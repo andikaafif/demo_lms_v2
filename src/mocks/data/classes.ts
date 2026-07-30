@@ -1,0 +1,68 @@
+import type { SchoolClass } from '@/features/classes/models/types'
+import { students } from './users'
+
+const studentIdsFor = (classId: string) =>
+  students.filter((student) => student.classId === classId).map((student) => student.id)
+
+export const classes: SchoolClass[] = [
+  {
+    id: 'c-1a',
+    name: 'Kelas 1A',
+    grade: 1,
+    academicYear: '2024/2025',
+    homeroomTeacherId: 't-6',
+    studentIds: studentIdsFor('c-1a'),
+    room: 'Ruang 101',
+    status: 'active',
+  },
+  {
+    id: 'c-2b',
+    name: 'Kelas 2B',
+    grade: 2,
+    academicYear: '2024/2025',
+    homeroomTeacherId: 't-5',
+    studentIds: studentIdsFor('c-2b'),
+    room: 'Ruang 102',
+    status: 'active',
+  },
+  {
+    id: 'c-3c',
+    name: 'Kelas 3C',
+    grade: 3,
+    academicYear: '2024/2025',
+    homeroomTeacherId: 't-4',
+    studentIds: studentIdsFor('c-3c'),
+    room: 'Ruang 201',
+    status: 'active',
+  },
+  {
+    id: 'c-4d',
+    name: 'Kelas 4D',
+    grade: 4,
+    academicYear: '2024/2025',
+    homeroomTeacherId: 't-2',
+    studentIds: studentIdsFor('c-4d'),
+    room: 'Ruang 202',
+    status: 'active',
+  },
+  {
+    id: 'c-5e',
+    name: 'Kelas 5E',
+    grade: 5,
+    academicYear: '2024/2025',
+    homeroomTeacherId: 't-1',
+    studentIds: studentIdsFor('c-5e'),
+    room: 'Ruang 301',
+    status: 'active',
+  },
+  {
+    id: 'c-6f',
+    name: 'Kelas 6F',
+    grade: 6,
+    academicYear: '2024/2025',
+    homeroomTeacherId: 't-3',
+    studentIds: studentIdsFor('c-6f'),
+    room: 'Ruang 302',
+    status: 'active',
+  },
+]
