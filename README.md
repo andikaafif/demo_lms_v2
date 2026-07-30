@@ -234,7 +234,7 @@ Announcements appear on:
 
 ---
 
-# 13. Demo Presentation Fl
+# 13. Demo Presentation Flow
 
 1. School Admin configures School Profile.
 2. School Admin creates Teachers, Students, Classes, and Subjects.
