@@ -1,4 +1,4 @@
-import { HttpResponse, delay, http } from 'msw'
+﻿import { HttpResponse, delay, http } from 'msw'
 import type {
   Subject,
   SubjectAssignment,
@@ -44,9 +44,13 @@ export const subjectsHandlers = [
     const url = new URL(request.url)
     const teacherId = url.searchParams.get('teacherId')
     const classId = url.searchParams.get('classId')
+    const academicYearId = url.searchParams.get('academicYearId')
+    const periodId = url.searchParams.get('periodId')
     let result = db.subjectAssignments
     if (teacherId) result = result.filter((item) => item.teacherId === teacherId)
     if (classId) result = result.filter((item) => item.classId === classId)
+    if (academicYearId) result = result.filter((item) => item.academicYearId === academicYearId)
+    if (periodId) result = result.filter((item) => item.periodId === periodId)
     return HttpResponse.json(result)
   }),
 

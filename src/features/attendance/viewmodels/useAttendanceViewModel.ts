@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+﻿import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api, buildQuery } from '@/lib/api'
 import { useSnackbarStore } from '@/store/snackbarStore'
 import { useRoleScope } from '@/hooks/useRoleScope'
+import { useAcademicContext } from '@/hooks/useAcademicContext'
 import { useReferenceData } from '@/hooks/useReferenceData'
 import { classIdOfStudent, classesForScope, defaultClassId, subjectIdsForTeacherInClass } from '@/lib/scope'
 import { todayKey } from '@/lib/format'
@@ -21,9 +22,11 @@ interface AttendanceViewModel {
   classId: string
   subjectId: string
   date: string
+  meeting: number
   setClassId: (value: string) => void
   setSubjectId: (value: string) => void
   setDate: (value: string) => void
+  setMeeting: (value: number) => void
   availableClasses: ReturnType<typeof useReferenceData>['classes']
   availableSubjects: ReturnType<typeof useReferenceData>['subjects']
   classStudents: Student[]
@@ -44,11 +47,13 @@ export function useAttendanceViewModel(): AttendanceViewModel {
   const { t } = useTranslation()
   const notify = useSnackbarStore((state) => state.notify)
   const scope = useRoleScope()
+  const academic = useAcademicContext()
   const reference = useReferenceData()
 
   const [classId, setClassId] = useState('')
   const [subjectId, setSubjectId] = useState('')
   const [date, setDate] = useState(todayKey())
+  const [meeting, setMeeting] = useState(1)
   const [sessions, setSessions] = useState<AttendanceSession[]>([])
   const [summary, setSummary] = useState<AttendanceSummary | null>(null)
   const [entries, setEntries] = useState<Record<string, AttendanceEntry>>({})
@@ -103,11 +108,19 @@ export function useAttendanceViewModel(): AttendanceViewModel {
     setLoading(true)
     try {
       const [sessionList, summaryData] = await Promise.all([
-        api.get<AttendanceSession[]>(`/api/attendance${buildQuery({ classId })}`),
+        api.get<AttendanceSession[]>(
+          `/api/attendance${buildQuery({
+            classId,
+            academicYearId: academic.academicYearId,
+            periodId: academic.periodId,
+          })}`,
+        ),
         api.get<AttendanceSummary>(
           `/api/attendance/summary${buildQuery({
             classId,
             studentId: scope.isReadOnly ? scope.studentId : undefined,
+            academicYearId: academic.academicYearId,
+            periodId: academic.periodId,
           })}`,
         ),
       ])
@@ -118,7 +131,15 @@ export function useAttendanceViewModel(): AttendanceViewModel {
     } finally {
       setLoading(false)
     }
-  }, [classId, notify, scope.isReadOnly, scope.studentId, t])
+  }, [
+    academic.academicYearId,
+    academic.periodId,
+    classId,
+    notify,
+    scope.isReadOnly,
+    scope.studentId,
+    t,
+  ])
 
   useEffect(() => {
     void load()
@@ -139,6 +160,7 @@ export function useAttendanceViewModel(): AttendanceViewModel {
       next[student.id] = found ?? { studentId: student.id, status: 'present', note: '' }
     })
     setEntries(next)
+    if (existingSession) setMeeting(existingSession.meeting)
   }, [classStudents, existingSession])
 
   const save = useCallback(async () => {
@@ -152,7 +174,12 @@ export function useAttendanceViewModel(): AttendanceViewModel {
         classId,
         subjectId,
         teacherId: scope.teacherId ?? 't-1',
+        academicYearId: academic.academicYearId,
+        periodId: academic.periodId,
         date,
+        meeting,
+        startTime: existingSession?.startTime ?? '07:30',
+        endTime: existingSession?.endTime ?? '09:00',
         entries: Object.values(entries),
       })
       await load()
@@ -164,7 +191,20 @@ export function useAttendanceViewModel(): AttendanceViewModel {
     } finally {
       setSaving(false)
     }
-  }, [classId, date, entries, load, notify, scope.teacherId, subjectId, t])
+  }, [
+    academic.academicYearId,
+    academic.periodId,
+    classId,
+    date,
+    entries,
+    existingSession,
+    load,
+    meeting,
+    notify,
+    scope.teacherId,
+    subjectId,
+    t,
+  ])
 
   return {
     canRecord: scope.isAdmin || scope.isTeacher,
@@ -173,9 +213,11 @@ export function useAttendanceViewModel(): AttendanceViewModel {
     classId,
     subjectId,
     date,
+    meeting,
     setClassId,
     setSubjectId,
     setDate,
+    setMeeting,
     availableClasses,
     availableSubjects,
     classStudents,

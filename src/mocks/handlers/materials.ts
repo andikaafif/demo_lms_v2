@@ -1,4 +1,4 @@
-import { HttpResponse, delay, http } from 'msw'
+﻿import { HttpResponse, delay, http } from 'msw'
 import type { Material, MaterialInput } from '@/features/materials/models/types'
 import { db, nextId } from '../data/db'
 
@@ -9,17 +9,24 @@ export const materialsHandlers = [
     const classId = url.searchParams.get('classId')
     const subjectId = url.searchParams.get('subjectId')
     const teacherId = url.searchParams.get('teacherId')
+    const academicYearId = url.searchParams.get('academicYearId')
+    const periodId = url.searchParams.get('periodId')
+    const meeting = url.searchParams.get('meeting')
     const search = (url.searchParams.get('search') ?? '').toLowerCase()
 
     let result = [...db.materials]
     if (classId) result = result.filter((item) => item.classId === classId)
     if (subjectId) result = result.filter((item) => item.subjectId === subjectId)
     if (teacherId) result = result.filter((item) => item.teacherId === teacherId)
+    if (academicYearId) result = result.filter((item) => item.academicYearId === academicYearId)
+    if (periodId) result = result.filter((item) => item.periodId === periodId)
+    if (meeting) result = result.filter((item) => String(item.meeting) === meeting)
     if (search) {
       result = result.filter(
         (item) =>
           item.title.toLowerCase().includes(search) ||
-          item.description.toLowerCase().includes(search),
+          item.description.toLowerCase().includes(search) ||
+          item.textbook.toLowerCase().includes(search),
       )
     }
     result.sort((a, b) => b.publishedAt.localeCompare(a.publishedAt))

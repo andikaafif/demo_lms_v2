@@ -253,3 +253,46 @@ Announcements appear on:
 - Teacher administration simplified.
 - Mobile-first experience.
 - Ready to scale into a complete Digital School Platform.
+
+---
+
+# 15. Feedback Implementation Notes (v1.1)
+
+The following enhancements from `requirement_feedback.md` are implemented in this demo:
+
+## Academic Year & Period
+- Academic years `2024/2025`, `2025/2026` (active), `2026/2027` with Odd/Even periods.
+- Every periodic record (class, subject assignment, material, assignment, attendance, grade) carries `academicYearId` + `periodId`.
+- A shared academic context selector (`AcademicContextBar`) defaults to the active year/period and is available on all academic modules.
+- Switching year/period filters data; historical data is kept separate.
+
+## Role & Permission
+- Permission model in `src/lib/permissions.ts` (`role → permission → resource → action`).
+- Homeroom teacher detection via `homeroomClassId` on the authenticated teacher.
+- Nav and routes follow the role matrix: School Profile and Account Management are admin-only; students no longer see School Profile; parents can view materials and classes.
+
+## Admin
+- Attendance monitoring table for the selected date with class/subject filters, free-text search, reset, submit status, detail view, CSV export.
+- Attendance override is enabled only after the lesson slot ends, with a required reason and an audit trail (`old_status`, `new_status`, `reason`, `updated_by`, `updated_at`).
+- Class management filters by academic year then period.
+- Grade recap per subject (matrix) and attitude grades.
+- Account management tab with search, role filter, and password reset (temporary password shown once).
+
+## Teacher
+- Schedule page scoped to the teacher's classes and the active academic context.
+- Class detail shows materials per meeting, enrolled students, and attendance per session.
+- Dynamic assignment form builder (short/long answer, multiple choice, checkbox, dropdown, file upload, date, number) with add/reorder/delete, required flag, options, and publish/draft state.
+- Regular teachers no longer see subject management or school profile; homeroom teachers get attitude-grade access.
+
+## Student & Parent
+- Student subject summary (attendance, materials, assignments, grades per subject) on the dashboard.
+- Parent dashboard includes the same subject summary with a child selector when multiple children exist.
+- Academic year/period filters apply to assignments, attendance, grades, and schedule.
+
+## Demo Accounts
+| Role | Username | Password |
+|---|---|---|
+| Admin | `admin` | `admin123` |
+| Teacher | `guru1` / `guru2` | `guru123` |
+| Student | `siswa1` / `siswa2` | `siswa123` |
+| Parent | `ortu1` | `ortu123` |

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { api, buildQuery } from '@/lib/api'
 import { useRoleScope } from '@/hooks/useRoleScope'
+import { useAcademicContext } from '@/hooks/useAcademicContext'
 import { useReferenceData } from '@/hooks/useReferenceData'
 import { classIdOfStudent, classesForScope, defaultClassId } from '@/lib/scope'
 import type { AssignmentWithStats, Submission } from '@/features/assignments/models/types'
@@ -33,6 +34,7 @@ interface DashboardViewModel {
 
 export function useDashboardViewModel(): DashboardViewModel {
   const scope = useRoleScope()
+  const academic = useAcademicContext()
   const reference = useReferenceData()
 
   const [school, setSchool] = useState<SchoolProfile | null>(null)
@@ -63,10 +65,18 @@ export function useDashboardViewModel(): DashboardViewModel {
       const [schoolData, assignmentList, materialList, announcementList] = await Promise.all([
         api.get<SchoolProfile>('/api/school'),
         api.get<AssignmentWithStats[]>(
-          `/api/assignments${buildQuery({ classId: scope.isReadOnly ? focusClassId : undefined })}`,
+          `/api/assignments${buildQuery({
+            classId: scope.isReadOnly ? focusClassId : undefined,
+            academicYearId: academic.academicYearId,
+            periodId: academic.periodId,
+          })}`,
         ),
         api.get<Material[]>(
-          `/api/materials${buildQuery({ classId: scope.isReadOnly ? focusClassId : undefined })}`,
+          `/api/materials${buildQuery({
+            classId: scope.isReadOnly ? focusClassId : undefined,
+            academicYearId: academic.academicYearId,
+            periodId: academic.periodId,
+          })}`,
         ),
         api.get<Announcement[]>(`/api/announcements${buildQuery({ role: scope.role })}`),
       ])
@@ -82,13 +92,22 @@ export function useDashboardViewModel(): DashboardViewModel {
       )
 
       if (scope.isAdmin) {
-        setAttendanceSummary(await api.get<AttendanceSummary>('/api/attendance/summary'))
+        setAttendanceSummary(
+          await api.get<AttendanceSummary>(
+            `/api/attendance/summary${buildQuery({
+              academicYearId: academic.academicYearId,
+              periodId: academic.periodId,
+            })}`,
+          ),
+        )
       } else if (focusClassId) {
         setAttendanceSummary(
           await api.get<AttendanceSummary>(
             `/api/attendance/summary${buildQuery({
               classId: focusClassId,
               studentId: scope.isReadOnly ? scope.studentId : undefined,
+              academicYearId: academic.academicYearId,
+              periodId: academic.periodId,
             })}`,
           ),
         )
@@ -97,6 +116,8 @@ export function useDashboardViewModel(): DashboardViewModel {
             `/api/grades${buildQuery({
               classId: focusClassId,
               studentId: scope.isReadOnly ? scope.studentId : undefined,
+              academicYearId: academic.academicYearId,
+              periodId: academic.periodId,
             })}`,
           ),
         )
@@ -106,7 +127,16 @@ export function useDashboardViewModel(): DashboardViewModel {
     } finally {
       setLoading(false)
     }
-  }, [focusClassId, reference.loading, scope.isAdmin, scope.isReadOnly, scope.role, scope.studentId])
+  }, [
+    academic.academicYearId,
+    academic.periodId,
+    focusClassId,
+    reference.loading,
+    scope.isAdmin,
+    scope.isReadOnly,
+    scope.role,
+    scope.studentId,
+  ])
 
   useEffect(() => {
     void load()

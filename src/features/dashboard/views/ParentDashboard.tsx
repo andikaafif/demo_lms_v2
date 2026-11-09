@@ -11,6 +11,7 @@ import { getInitials } from '@/lib/format'
 import { statusColors } from '@/theme'
 import { useRoleScope } from '@/hooks/useRoleScope'
 import { useDashboardViewModel } from '../viewmodels/useDashboardViewModel'
+import SubjectSummaryView from './SubjectSummaryView'
 import { DashboardHeader, RecentAnnouncements, UpcomingAssignments } from './DashboardShared'
 
 export default function ParentDashboard() {
@@ -153,7 +154,11 @@ export default function ParentDashboard() {
           subjectNameOf={vm.subjectNameOf}
           subjectColorOf={vm.subjectColorOf}
         />
-        <RecentAnnouncements announcements={vm.announcements} />
+        <Box sx={{ mb: 2.5 }}>
+        <SubjectSummaryView />
+      </Box>
+
+      <RecentAnnouncements announcements={vm.announcements} />
       </Box>
     </Box>
   )

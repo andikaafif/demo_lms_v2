@@ -1,4 +1,4 @@
-import { HttpResponse, delay, http } from 'msw'
+﻿import { HttpResponse, delay, http } from 'msw'
 import type { Student, StudentInput, Teacher, TeacherInput } from '@/features/users/models/types'
 import { db, nextId, randomAvatarColor } from '../data/db'
 
@@ -146,5 +146,42 @@ export const usersHandlers = [
       })
     }
     return HttpResponse.json({ username, password: 'ortu123', student })
+  }),
+  http.get('/api/users/accounts', async ({ request }) => {
+    await delay(300)
+    const url = new URL(request.url)
+    const search = (url.searchParams.get('search') ?? '').toLowerCase()
+    const role = url.searchParams.get('role')
+    let result = db.accounts
+    if (role) result = result.filter((item) => item.role === role)
+    if (search) {
+      result = result.filter(
+        (item) =>
+          item.name.toLowerCase().includes(search) ||
+          item.username.toLowerCase().includes(search) ||
+          item.email.toLowerCase().includes(search),
+      )
+    }
+    return HttpResponse.json(
+      result.map((account) => {
+        const safe = { ...account }
+        delete (safe as { password?: string }).password
+        return safe
+      }),
+    )
+  }),
+
+  http.post('/api/users/accounts/:id/reset-password', async ({ params }) => {
+    await delay(600)
+    const account = db.accounts.find((item) => item.id === params.id)
+    if (!account) return HttpResponse.json({ message: 'notFound' }, { status: 404 })
+    const temporaryPassword = `Edu${Math.random().toString(36).slice(2, 8)}!`
+    account.password = temporaryPassword
+    return HttpResponse.json({
+      userId: account.id,
+      username: account.username,
+      temporaryPassword,
+      mustChangePassword: true,
+    })
   }),
 ]

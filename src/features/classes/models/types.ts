@@ -1,10 +1,11 @@
-export type ClassStatus = 'active' | 'archived'
+﻿export type ClassStatus = 'active' | 'archived'
 
 export interface SchoolClass {
   id: string
   name: string
   grade: number
-  academicYear: string
+  academicYearId: string
+  periodId: string
   homeroomTeacherId: string | null
   studentIds: string[]
   room: string

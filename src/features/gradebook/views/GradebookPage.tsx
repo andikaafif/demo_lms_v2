@@ -18,6 +18,8 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  Tab,
+  Tabs,
   TextField,
   Tooltip,
   Typography,
@@ -35,7 +37,10 @@ import LoadingSkeleton from '@/components/common/LoadingSkeleton'
 import EmptyState from '@/components/common/EmptyState'
 import StatCard from '@/components/common/StatCard'
 import { useRoleScope } from '@/hooks/useRoleScope'
+import AcademicContextBar from '@/components/common/AcademicContextBar'
 import { useGradebookViewModel } from '../viewmodels/useGradebookViewModel'
+import GradeRecapView from './GradeRecapView'
+import AttitudeGradeView from './AttitudeGradeView'
 
 function scoreColor(score: number | null, max: number): string {
   if (score === null) return 'text.disabled'
@@ -58,6 +63,7 @@ export default function GradebookPage() {
     name: '',
   })
   const [noteValue, setNoteValue] = useState('')
+  const [tab, setTab] = useState(0)
 
   const columns = vm.gradebook?.rows[0]?.items ?? []
 
@@ -76,6 +82,15 @@ export default function GradebookPage() {
         icon={<GradingRoundedIcon sx={{ fontSize: 30 }} />}
       />
 
+      <AcademicContextBar />
+
+      <Tabs value={tab} onChange={(_, value) => setTab(value)} sx={{ mb: 2 }}>
+        <Tab label={t('gradebook.tabAssignments')} />
+        <Tab label={t('gradebook.tabRecap')} />
+        <Tab label={t('gradebook.tabAttitude')} />
+      </Tabs>
+
+      <Box sx={{ display: tab === 0 ? 'block' : 'none' }}>
       <Card sx={{ mb: 2.5 }}>
         <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
@@ -258,6 +273,10 @@ export default function GradebookPage() {
           </Box>
         </Card>
       )}
+      </Box>
+
+      {tab === 1 ? <GradeRecapView classId={vm.classId} /> : null}
+      {tab === 2 ? <AttitudeGradeView classId={vm.classId} /> : null}
 
       <Dialog
         open={noteDialog.open}

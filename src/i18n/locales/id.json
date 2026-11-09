@@ -83,7 +83,8 @@
     "announcements": "Pengumuman",
     "sectionMain": "Utama",
     "sectionAcademic": "Akademik",
-    "sectionManagement": "Manajemen"
+    "sectionManagement": "Manajemen",
+    "schedule": "Jadwal"
   },
   "roles": {
     "admin": "Admin Sekolah",
@@ -148,7 +149,10 @@
     "schoolSnapshot": "Sekilas Sekolah",
     "accreditation": "Akreditasi",
     "principal": "Kepala Sekolah",
-    "npsn": "NPSN"
+    "npsn": "NPSN",
+    "subjectSummary": "Ringkasan Mata Pelajaran",
+    "subjectSummaryHint": "Presensi, materi, tugas, dan nilai per mata pelajaran",
+    "openSubject": "Buka"
   },
   "school": {
     "title": "Profil Sekolah",
@@ -175,7 +179,8 @@
       "principalRequired": "Nama kepala sekolah wajib diisi",
       "phoneRequired": "Nomor telepon wajib diisi",
       "addressRequired": "Alamat wajib diisi",
-      "yearInvalid": "Tahun berdiri tidak valid"
+      "yearInvalid": "Tahun berdiri tidak valid",
+      "descriptionRequired": "Deskripsi sekolah wajib diisi"
     }
   },
   "users": {
@@ -231,7 +236,18 @@
       "nisnRequired": "NISN wajib diisi",
       "classRequired": "Kelas wajib dipilih",
       "birthDateRequired": "Tanggal lahir wajib diisi"
-    }
+    },
+    "tabAccounts": "Akun",
+    "searchAccount": "Cari nama, username, atau email",
+    "role": "Peran",
+    "username": "Username",
+    "resetPassword": "Reset Password",
+    "resetPasswordSuccess": "Password berhasil direset",
+    "resetPasswordConfirm": "Reset password untuk {{name}}?",
+    "resetPasswordInfo": "Password sementara akan dibuat dan wajib diganti oleh pengguna.",
+    "temporaryPassword": "Password Sementara",
+    "temporaryPasswordHint": "Bagikan password sementara ini secara aman. Password tidak akan ditampilkan lagi.",
+    "noAccounts": "Akun tidak ditemukan"
   },
   "classes": {
     "title": "Manajemen Kelas",
@@ -265,8 +281,11 @@
       "nameRequired": "Nama kelas wajib diisi",
       "gradeRange": "Tingkat harus antara 1 sampai 6",
       "academicYearRequired": "Tahun ajaran wajib diisi",
-      "roomRequired": "Ruang kelas wajib diisi"
-    }
+      "roomRequired": "Ruang kelas wajib diisi",
+      "periodRequired": "Periode wajib dipilih"
+    },
+    "materialsPerMeeting": "Materi per Pertemuan",
+    "attendancePerSession": "Presensi per Sesi"
   },
   "subjects": {
     "title": "Mata Pelajaran",
@@ -333,8 +352,17 @@
       "subjectRequired": "Mata pelajaran wajib dipilih",
       "classRequired": "Kelas wajib dipilih",
       "youtubeRequired": "Tautan YouTube wajib diisi untuk jenis video",
-      "urlInvalid": "Format tautan tidak valid"
-    }
+      "urlInvalid": "Format tautan tidak valid",
+      "meetingRange": "Pertemuan harus antara 1 dan 52"
+    },
+    "meeting": "Pertemuan",
+    "meetingLabel": "Pertemuan {{meeting}}",
+    "textbook": "Buku Teks",
+    "linkLabel": "Label Link Pendukung",
+    "linkUrl": "URL Link Pendukung",
+    "supportingLinks": "Link Pendukung",
+    "typePpt": "Presentasi (PPT)",
+    "typeDoc": "Dokumen (DOC)"
   },
   "assignments": {
     "title": "Tugas",
@@ -383,8 +411,34 @@
       "dueDateRequired": "Batas waktu wajib diisi",
       "maxScoreRange": "Nilai maksimal antara 1 sampai 100",
       "scoreRange": "Nilai harus antara 0 sampai {{max}}",
-      "answerRequired": "Jawaban tidak boleh kosong"
-    }
+      "answerRequired": "Jawaban tidak boleh kosong",
+      "fieldLabelRequired": "Label pertanyaan wajib diisi",
+      "meetingRange": "Pertemuan harus antara 1 dan 52"
+    },
+    "meeting": "Pertemuan",
+    "meetingLabel": "Pertemuan {{meeting}}",
+    "published": "Dipublikasikan",
+    "draft": "Draf",
+    "questions": "Pertanyaan",
+    "questionsHint": "Susun formulir tugas seperti Google Form",
+    "addField": "Tambah Field",
+    "noFields": "Belum ada pertanyaan. Tambahkan field untuk menyusun formulir.",
+    "question": "Pertanyaan",
+    "moveUp": "Naikkan",
+    "moveDown": "Turunkan",
+    "fieldLabel": "Label Pertanyaan",
+    "fieldType": "Tipe Field",
+    "required": "Wajib",
+    "option": "Opsi",
+    "addOption": "Tambah Opsi",
+    "fieldType_shortAnswer": "Jawaban Singkat",
+    "fieldType_longAnswer": "Jawaban Panjang",
+    "fieldType_multipleChoice": "Pilihan Ganda",
+    "fieldType_checkbox": "Checkbox",
+    "fieldType_dropdown": "Dropdown",
+    "fieldType_fileUpload": "Unggah File",
+    "fieldType_date": "Tanggal",
+    "fieldType_number": "Angka"
   },
   "attendance": {
     "title": "Presensi",
@@ -411,7 +465,28 @@
     "childAttendance": "Presensi Anak",
     "recap": "Rekap {{count}} sesi terakhir",
     "noteHint": "Catatan (opsional)",
-    "notEnrolled": "Tidak ada siswa terdaftar di kelas ini"
+    "notEnrolled": "Tidak ada siswa terdaftar di kelas ini",
+    "monitorSubtitle": "Pantau sesi presensi hari ini dan lakukan override bila perlu",
+    "monitorTitle": "Sesi Presensi Hari Ini",
+    "monitorHint": "Sesi yang berjalan hari ini beserta status submitnya",
+    "noSessionsToday": "Tidak ada sesi presensi untuk filter yang dipilih",
+    "teacher": "Guru",
+    "schedule": "Jadwal",
+    "submitStatus": "Status Submit",
+    "submitted": "Sudah Submit",
+    "notSubmitted": "Belum Submit",
+    "exportCsv": "Ekspor CSV",
+    "exportSuccess": "Presensi berhasil diekspor",
+    "detailTitle": "Detail Presensi",
+    "overrideLocked": "Override tersedia setelah jam pelajaran berakhir",
+    "overrideUnlocked": "Jam pelajaran telah berakhir. Anda dapat melakukan override sekarang.",
+    "overrideReason": "Alasan override",
+    "overrideReasonRequired": "Mohon isi alasan override",
+    "saveOverride": "Simpan Override",
+    "overrideSuccess": "Presensi berhasil di-override",
+    "overrideNotAllowed": "Override belum diperbolehkan",
+    "auditTrail": "Jejak Audit",
+    "meeting": "Pertemuan"
   },
   "gradebook": {
     "title": "Buku Nilai",
@@ -431,7 +506,20 @@
     "notGraded": "Belum dinilai",
     "highest": "Nilai Tertinggi",
     "lowest": "Nilai Terendah",
-    "exportHint": "Rekap nilai dapat dicetak melalui menu cetak peramban"
+    "exportHint": "Rekap nilai dapat dicetak melalui menu cetak peramban",
+    "tabAssignments": "Nilai Tugas",
+    "tabRecap": "Rekap Mata Pelajaran",
+    "tabAttitude": "Nilai Sikap",
+    "recapTitle": "Rekap Nilai Mata Pelajaran",
+    "recapHint": "Rata-rata nilai per mata pelajaran untuk kelas dan periode terpilih",
+    "noRecap": "Belum ada rekap",
+    "noRecapHint": "Rekap muncul setelah tugas dinilai",
+    "attitudeTitle": "Nilai Sikap",
+    "attitudeHint": "Penilaian sikap per siswa untuk periode terpilih",
+    "noAttitude": "Belum ada nilai sikap",
+    "noAttitudeHint": "Nilai sikap muncul setelah wali kelas mengisinya",
+    "attitudeGrade": "Nilai Sikap",
+    "attitudeSaved": "Nilai sikap berhasil disimpan"
   },
   "announcements": {
     "title": "Pengumuman",
@@ -476,5 +564,28 @@
     "title": "Halaman Tidak Ditemukan",
     "message": "Halaman yang Anda cari tidak tersedia atau telah dipindahkan.",
     "backHome": "Kembali ke Beranda"
+  },
+  "academic": {
+    "academicYear": "Tahun Ajaran",
+    "period": "Periode",
+    "active": "Aktif",
+    "odd": "Ganjil",
+    "even": "Genap",
+    "activeContext": "Periode aktif",
+    "historicalContext": "Periode historis",
+    "resetToActive": "Kembali ke periode aktif"
+  },
+  "schedule": {
+    "title": "Jadwal Mengajar",
+    "subtitle": "Jadwal mingguan untuk tahun ajaran dan periode yang dipilih",
+    "noSchedule": "Belum ada jadwal",
+    "noScheduleHint": "Jadwal muncul setelah mata pelajaran ditetapkan ke kelas",
+    "monday": "Senin",
+    "tuesday": "Selasa",
+    "wednesday": "Rabu",
+    "thursday": "Kamis",
+    "friday": "Jumat",
+    "saturday": "Sabtu",
+    "meeting": "Pertemuan {{meeting}}"
   }
 }

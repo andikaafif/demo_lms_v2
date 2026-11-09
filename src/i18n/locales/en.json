@@ -83,7 +83,8 @@
     "announcements": "Announcements",
     "sectionMain": "Main",
     "sectionAcademic": "Academic",
-    "sectionManagement": "Management"
+    "sectionManagement": "Management",
+    "schedule": "Schedule"
   },
   "roles": {
     "admin": "School Admin",
@@ -148,7 +149,10 @@
     "schoolSnapshot": "School Snapshot",
     "accreditation": "Accreditation",
     "principal": "Principal",
-    "npsn": "NPSN"
+    "npsn": "NPSN",
+    "subjectSummary": "Subject Summary",
+    "subjectSummaryHint": "Attendance, materials, assignments, and grades per subject",
+    "openSubject": "Open"
   },
   "school": {
     "title": "School Profile",
@@ -175,7 +179,8 @@
       "principalRequired": "Principal name is required",
       "phoneRequired": "Phone number is required",
       "addressRequired": "Address is required",
-      "yearInvalid": "Invalid established year"
+      "yearInvalid": "Invalid established year",
+      "descriptionRequired": "School description is required"
     }
   },
   "users": {
@@ -231,7 +236,18 @@
       "nisnRequired": "NISN is required",
       "classRequired": "Class is required",
       "birthDateRequired": "Date of birth is required"
-    }
+    },
+    "tabAccounts": "Accounts",
+    "searchAccount": "Search name, username, or email",
+    "role": "Role",
+    "username": "Username",
+    "resetPassword": "Reset Password",
+    "resetPasswordSuccess": "Password reset successfully",
+    "resetPasswordConfirm": "Reset the password for {{name}}?",
+    "resetPasswordInfo": "A temporary password will be generated and must be changed by the user.",
+    "temporaryPassword": "Temporary Password",
+    "temporaryPasswordHint": "Share this temporary password securely. It will not be shown again.",
+    "noAccounts": "No accounts found"
   },
   "classes": {
     "title": "Class Management",
@@ -265,8 +281,11 @@
       "nameRequired": "Class name is required",
       "gradeRange": "Grade must be between 1 and 6",
       "academicYearRequired": "Academic year is required",
-      "roomRequired": "Room is required"
-    }
+      "roomRequired": "Room is required",
+      "periodRequired": "Period is required"
+    },
+    "materialsPerMeeting": "Materials per Meeting",
+    "attendancePerSession": "Attendance per Session"
   },
   "subjects": {
     "title": "Subjects",
@@ -333,8 +352,17 @@
       "subjectRequired": "Subject is required",
       "classRequired": "Class is required",
       "youtubeRequired": "YouTube URL is required for video materials",
-      "urlInvalid": "Invalid URL format"
-    }
+      "urlInvalid": "Invalid URL format",
+      "meetingRange": "Meeting must be between 1 and 52"
+    },
+    "meeting": "Meeting",
+    "meetingLabel": "Meeting {{meeting}}",
+    "textbook": "Textbook",
+    "linkLabel": "Supporting Link Label",
+    "linkUrl": "Supporting Link URL",
+    "supportingLinks": "Supporting Links",
+    "typePpt": "Presentation (PPT)",
+    "typeDoc": "Document (DOC)"
   },
   "assignments": {
     "title": "Assignments",
@@ -383,8 +411,34 @@
       "dueDateRequired": "Due date is required",
       "maxScoreRange": "Maximum score must be between 1 and 100",
       "scoreRange": "Score must be between 0 and {{max}}",
-      "answerRequired": "Answer cannot be empty"
-    }
+      "answerRequired": "Answer cannot be empty",
+      "fieldLabelRequired": "Question label is required",
+      "meetingRange": "Meeting must be between 1 and 52"
+    },
+    "meeting": "Meeting",
+    "meetingLabel": "Meeting {{meeting}}",
+    "published": "Published",
+    "draft": "Draft",
+    "questions": "Questions",
+    "questionsHint": "Build the assignment form like a Google Form",
+    "addField": "Add Field",
+    "noFields": "No questions yet. Add a field to build the form.",
+    "question": "Question",
+    "moveUp": "Move up",
+    "moveDown": "Move down",
+    "fieldLabel": "Question Label",
+    "fieldType": "Field Type",
+    "required": "Required",
+    "option": "Option",
+    "addOption": "Add Option",
+    "fieldType_shortAnswer": "Short Answer",
+    "fieldType_longAnswer": "Long Answer",
+    "fieldType_multipleChoice": "Multiple Choice",
+    "fieldType_checkbox": "Checkbox",
+    "fieldType_dropdown": "Dropdown",
+    "fieldType_fileUpload": "File Upload",
+    "fieldType_date": "Date",
+    "fieldType_number": "Number"
   },
   "attendance": {
     "title": "Attendance",
@@ -411,7 +465,28 @@
     "childAttendance": "Child Attendance",
     "recap": "Recap of the last {{count}} sessions",
     "noteHint": "Note (optional)",
-    "notEnrolled": "No students enrolled in this class"
+    "notEnrolled": "No students enrolled in this class",
+    "monitorSubtitle": "Monitor today's attendance sessions and override when needed",
+    "monitorTitle": "Today's Attendance Sessions",
+    "monitorHint": "Sessions running today with their submission status",
+    "noSessionsToday": "No attendance sessions scheduled for the selected filters",
+    "teacher": "Teacher",
+    "schedule": "Schedule",
+    "submitStatus": "Submit Status",
+    "submitted": "Submitted",
+    "notSubmitted": "Not Submitted",
+    "exportCsv": "Export CSV",
+    "exportSuccess": "Attendance exported successfully",
+    "detailTitle": "Attendance Detail",
+    "overrideLocked": "Override is available once the lesson has ended",
+    "overrideUnlocked": "The lesson has ended. You can override attendance now.",
+    "overrideReason": "Override reason",
+    "overrideReasonRequired": "Please provide a reason for the override",
+    "saveOverride": "Save Override",
+    "overrideSuccess": "Attendance overridden successfully",
+    "overrideNotAllowed": "Override is not allowed yet",
+    "auditTrail": "Audit Trail",
+    "meeting": "Meeting"
   },
   "gradebook": {
     "title": "Gradebook",
@@ -431,7 +506,20 @@
     "notGraded": "Not graded",
     "highest": "Highest Score",
     "lowest": "Lowest Score",
-    "exportHint": "The grade recap can be printed via your browser print menu"
+    "exportHint": "The grade recap can be printed via your browser print menu",
+    "tabAssignments": "Assignment Scores",
+    "tabRecap": "Subject Recap",
+    "tabAttitude": "Attitude Grades",
+    "recapTitle": "Subject Score Recap",
+    "recapHint": "Average score per subject for the selected class and period",
+    "noRecap": "No recap available",
+    "noRecapHint": "Recap appears once assignments are graded",
+    "attitudeTitle": "Attitude Grades",
+    "attitudeHint": "Attitude assessment per student for the selected period",
+    "noAttitude": "No attitude grades yet",
+    "noAttitudeHint": "Attitude grades appear once the homeroom teacher fills them in",
+    "attitudeGrade": "Attitude Grade",
+    "attitudeSaved": "Attitude grade saved successfully"
   },
   "announcements": {
     "title": "Announcements",
@@ -476,5 +564,28 @@
     "title": "Page Not Found",
     "message": "The page you are looking for is unavailable or has been moved.",
     "backHome": "Back to Dashboard"
+  },
+  "academic": {
+    "academicYear": "Academic Year",
+    "period": "Period",
+    "active": "Active",
+    "odd": "Odd",
+    "even": "Even",
+    "activeContext": "Active period",
+    "historicalContext": "Historical period",
+    "resetToActive": "Reset to active period"
+  },
+  "schedule": {
+    "title": "Teaching Schedule",
+    "subtitle": "Weekly schedule for the selected academic year and period",
+    "noSchedule": "No schedule yet",
+    "noScheduleHint": "Schedule entries appear once subjects are assigned to classes",
+    "monday": "Monday",
+    "tuesday": "Tuesday",
+    "wednesday": "Wednesday",
+    "thursday": "Thursday",
+    "friday": "Friday",
+    "saturday": "Saturday",
+    "meeting": "Meeting {{meeting}}"
   }
 }

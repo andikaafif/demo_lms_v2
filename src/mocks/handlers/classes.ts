@@ -1,4 +1,4 @@
-import { HttpResponse, delay, http } from 'msw'
+﻿import { HttpResponse, delay, http } from 'msw'
 import type { SchoolClass, SchoolClassInput } from '@/features/classes/models/types'
 import { db, nextId } from '../data/db'
 
@@ -7,7 +7,11 @@ export const classesHandlers = [
     await delay(350)
     const url = new URL(request.url)
     const teacherId = url.searchParams.get('teacherId')
+    const academicYearId = url.searchParams.get('academicYearId')
+    const periodId = url.searchParams.get('periodId')
     let result = db.classes
+    if (academicYearId) result = result.filter((item) => item.academicYearId === academicYearId)
+    if (periodId) result = result.filter((item) => item.periodId === periodId)
     if (teacherId) {
       const taughtClassIds = new Set(
         db.subjectAssignments

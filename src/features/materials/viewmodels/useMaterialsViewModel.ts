@@ -1,9 +1,10 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+﻿import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { z } from 'zod'
 import { api, buildQuery } from '@/lib/api'
 import { useSnackbarStore } from '@/store/snackbarStore'
 import { useRoleScope } from '@/hooks/useRoleScope'
+import { useAcademicContext } from '@/hooks/useAcademicContext'
 import { useReferenceData } from '@/hooks/useReferenceData'
 import { classIdOfStudent, classesForScope } from '@/lib/scope'
 import type { Material, MaterialInput, MaterialType } from '../models/types'
@@ -14,7 +15,15 @@ export const materialSchema = z
     description: z.string().min(1, 'materials.validation.descriptionRequired'),
     subjectId: z.string().min(1, 'materials.validation.subjectRequired'),
     classId: z.string().min(1, 'materials.validation.classRequired'),
-    type: z.enum(['pdf', 'image', 'video', 'link', 'text']),
+    meeting: z
+      .number({ invalid_type_error: 'materials.validation.meetingRange' })
+      .int()
+      .min(1, 'materials.validation.meetingRange')
+      .max(52, 'materials.validation.meetingRange'),
+    textbook: z.string(),
+    linkLabel: z.string(),
+    linkUrl: z.string(),
+    type: z.enum(['pdf', 'image', 'video', 'link', 'text', 'ppt', 'doc']),
     youtubeUrl: z.string().optional(),
     attachmentName: z.string().optional(),
   })
@@ -55,6 +64,10 @@ const sizeForType = (type: MaterialType): number => {
       return 780
     case 'image':
       return 1650
+    case 'ppt':
+      return 3200
+    case 'doc':
+      return 540
     default:
       return 220
   }
@@ -64,6 +77,7 @@ export function useMaterialsViewModel(): MaterialsViewModel {
   const { t } = useTranslation()
   const notify = useSnackbarStore((state) => state.notify)
   const scope = useRoleScope()
+  const academic = useAcademicContext()
   const reference = useReferenceData()
 
   const [materials, setMaterials] = useState<Material[]>([])
@@ -97,6 +111,8 @@ export function useMaterialsViewModel(): MaterialsViewModel {
         classId: effectiveClassId,
         subjectId: subjectFilter,
         search,
+        academicYearId: academic.academicYearId,
+        periodId: academic.periodId,
       })
       setMaterials(await api.get<Material[]>(`/api/materials${query}`))
     } catch {
@@ -104,7 +120,17 @@ export function useMaterialsViewModel(): MaterialsViewModel {
     } finally {
       setLoading(false)
     }
-  }, [effectiveClassId, notify, ownClassId, scope.isReadOnly, search, subjectFilter, t])
+  }, [
+    academic.academicYearId,
+    academic.periodId,
+    effectiveClassId,
+    notify,
+    ownClassId,
+    scope.isReadOnly,
+    search,
+    subjectFilter,
+    t,
+  ])
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -138,6 +164,20 @@ export function useMaterialsViewModel(): MaterialsViewModel {
       subjectId: values.subjectId,
       classId: values.classId,
       teacherId: scope.teacherId ?? 't-1',
+      academicYearId: academic.academicYearId,
+      periodId: academic.periodId,
+      meeting: values.meeting,
+      textbook: values.textbook,
+      links:
+        values.linkUrl.trim().length > 0
+          ? [
+              {
+                id: `link-${Date.now()}`,
+                label: values.linkLabel.trim() || values.linkUrl,
+                url: values.linkUrl,
+              },
+            ]
+          : [],
       type: values.type,
       youtubeUrl: values.youtubeUrl ?? '',
       attachments: values.attachmentName
@@ -152,7 +192,7 @@ export function useMaterialsViewModel(): MaterialsViewModel {
           ]
         : [],
     }),
-    [scope.teacherId],
+    [academic.academicYearId, academic.periodId, scope.teacherId],
   )
 
   return {

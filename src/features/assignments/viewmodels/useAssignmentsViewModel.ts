@@ -1,22 +1,47 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+﻿import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { z } from 'zod'
 import { api, buildQuery } from '@/lib/api'
 import { useSnackbarStore } from '@/store/snackbarStore'
 import { useRoleScope } from '@/hooks/useRoleScope'
+import { useAcademicContext } from '@/hooks/useAcademicContext'
 import { useReferenceData } from '@/hooks/useReferenceData'
 import { classIdOfStudent, classesForScope } from '@/lib/scope'
 import type {
+  AssignmentField,
+  AssignmentFieldType,
   AssignmentInput,
   AssignmentWithStats,
   Submission,
 } from '../models/types'
+
+export const assignmentFieldSchema = z.object({
+  id: z.string(),
+  type: z.enum([
+    'shortAnswer',
+    'longAnswer',
+    'multipleChoice',
+    'checkbox',
+    'dropdown',
+    'fileUpload',
+    'date',
+    'number',
+  ]),
+  label: z.string().min(1, 'assignments.validation.fieldLabelRequired'),
+  required: z.boolean(),
+  options: z.array(z.string()),
+})
 
 export const assignmentSchema = z.object({
   title: z.string().min(1, 'assignments.validation.titleRequired'),
   description: z.string().min(1, 'assignments.validation.descriptionRequired'),
   subjectId: z.string().min(1, 'assignments.validation.subjectRequired'),
   classId: z.string().min(1, 'assignments.validation.classRequired'),
+  meeting: z
+    .number({ invalid_type_error: 'assignments.validation.meetingRange' })
+    .int()
+    .min(1, 'assignments.validation.meetingRange')
+    .max(52, 'assignments.validation.meetingRange'),
   dueDate: z.string().min(1, 'assignments.validation.dueDateRequired'),
   maxScore: z
     .number({ invalid_type_error: 'assignments.validation.maxScoreRange' })
@@ -25,12 +50,14 @@ export const assignmentSchema = z.object({
     .max(100, 'assignments.validation.maxScoreRange'),
   allowFileUpload: z.boolean(),
   allowTextAnswer: z.boolean(),
+  published: z.boolean(),
+  fields: z.array(assignmentFieldSchema),
 })
 
 export type AssignmentFormValues = z.infer<typeof assignmentSchema>
 
 export const submissionSchema = z.object({
-  textAnswer: z.string().min(1, 'assignments.validation.answerRequired'),
+  textAnswer: z.string(),
   fileName: z.string().optional(),
 })
 
@@ -55,7 +82,11 @@ interface AssignmentsViewModel {
   createAssignment: (values: AssignmentFormValues) => Promise<boolean>
   updateAssignment: (id: string, values: AssignmentFormValues) => Promise<boolean>
   deleteAssignment: (id: string) => Promise<boolean>
-  submitAssignment: (assignmentId: string, values: SubmissionFormValues) => Promise<boolean>
+  submitAssignment: (
+    assignmentId: string,
+    values: SubmissionFormValues,
+    answers?: Record<string, string | string[]>,
+  ) => Promise<boolean>
   gradeSubmission: (submissionId: string, score: number, feedback: string) => Promise<boolean>
   submissionsFor: (assignmentId: string) => Submission[]
   mySubmissionFor: (assignmentId: string) => Submission | undefined
@@ -66,10 +97,30 @@ interface AssignmentsViewModel {
   studentNameOf: (id: string | null | undefined) => string
 }
 
+export const FIELD_TYPES: AssignmentFieldType[] = [
+  'shortAnswer',
+  'longAnswer',
+  'multipleChoice',
+  'checkbox',
+  'dropdown',
+  'fileUpload',
+  'date',
+  'number',
+]
+
+export const createField = (type: AssignmentFieldType = 'shortAnswer'): AssignmentField => ({
+  id: `field-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+  type,
+  label: '',
+  required: false,
+  options: type === 'multipleChoice' || type === 'checkbox' || type === 'dropdown' ? [''] : [],
+})
+
 export function useAssignmentsViewModel(): AssignmentsViewModel {
   const { t } = useTranslation()
   const notify = useSnackbarStore((state) => state.notify)
   const scope = useRoleScope()
+  const academic = useAcademicContext()
   const reference = useReferenceData()
 
   const [assignments, setAssignments] = useState<AssignmentWithStats[]>([])
@@ -101,7 +152,13 @@ export function useAssignmentsViewModel(): AssignmentsViewModel {
     setLoading(true)
     try {
       const list = await api.get<AssignmentWithStats[]>(
-        `/api/assignments${buildQuery({ classId: effectiveClassId, subjectId: subjectFilter })}`,
+        `/api/assignments${buildQuery({
+          classId: effectiveClassId,
+          subjectId: subjectFilter,
+          academicYearId: academic.academicYearId,
+          periodId: academic.periodId,
+          includeDrafts: scope.isAdmin || scope.isTeacher ? 'true' : undefined,
+        })}`,
       )
       setAssignments(list)
       const submissionQuery = scope.isReadOnly ? buildQuery({ studentId: scope.studentId }) : ''
@@ -111,7 +168,19 @@ export function useAssignmentsViewModel(): AssignmentsViewModel {
     } finally {
       setLoading(false)
     }
-  }, [effectiveClassId, notify, ownClassId, scope.isReadOnly, scope.studentId, subjectFilter, t])
+  }, [
+    academic.academicYearId,
+    academic.periodId,
+    effectiveClassId,
+    notify,
+    ownClassId,
+    scope.isAdmin,
+    scope.isReadOnly,
+    scope.isTeacher,
+    scope.studentId,
+    subjectFilter,
+    t,
+  ])
 
   useEffect(() => {
     void load()
@@ -140,17 +209,24 @@ export function useAssignmentsViewModel(): AssignmentsViewModel {
       ...values,
       dueDate: new Date(values.dueDate).toISOString(),
       teacherId: scope.teacherId ?? 't-1',
+      academicYearId: academic.academicYearId,
+      periodId: academic.periodId,
+      fields: values.fields.map((field) => ({
+        ...field,
+        options: field.options.filter((option) => option.trim().length > 0),
+      })),
     }),
-    [scope.teacherId],
+    [academic.academicYearId, academic.periodId, scope.teacherId],
   )
 
   const submitAssignment = useCallback(
-    (assignmentId: string, values: SubmissionFormValues) =>
+    (assignmentId: string, values: SubmissionFormValues, answers?: Record<string, string | string[]>) =>
       run(
         () =>
           api.post(`/api/assignments/${assignmentId}/submit`, {
             studentId: scope.studentId,
             textAnswer: values.textAnswer,
+            answers: answers ?? {},
             files: values.fileName
               ? [
                   {
@@ -172,7 +248,7 @@ export function useAssignmentsViewModel(): AssignmentsViewModel {
     submissions,
     loading: loading || reference.loading,
     saving,
-    canManage: scope.isAdmin || scope.isTeacher,
+    canManage: scope.isTeacher,
     isStudent: scope.isStudent,
     isParent: scope.isParent,
     classFilter,

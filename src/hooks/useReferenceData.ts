@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useState } from 'react'
-import { api } from '@/lib/api'
+﻿import { useCallback, useEffect, useState } from 'react'
+import { api, buildQuery } from '@/lib/api'
+import { useAcademicContext } from '@/hooks/useAcademicContext'
 import type { SchoolClass } from '@/features/classes/models/types'
 import type { Subject, SubjectAssignment } from '@/features/subjects/models/types'
 import type { Student, Teacher } from '@/features/users/models/types'
@@ -21,6 +22,7 @@ interface ReferenceData {
 
 /** Shared lookup data used by nearly every module view. */
 export function useReferenceData(): ReferenceData {
+  const academic = useAcademicContext()
   const [classes, setClasses] = useState<SchoolClass[]>([])
   const [subjects, setSubjects] = useState<Subject[]>([])
   const [teachers, setTeachers] = useState<Teacher[]>([])
@@ -31,22 +33,32 @@ export function useReferenceData(): ReferenceData {
   const reload = useCallback(async () => {
     setLoading(true)
     try {
+      const query = buildQuery({
+        academicYearId: academic.academicYearId,
+        periodId: academic.periodId,
+      })
       const [classList, subjectList, teacherList, studentList, assignmentList] = await Promise.all([
-        api.get<SchoolClass[]>('/api/classes'),
+        api.get<SchoolClass[]>(`/api/classes${query}`),
         api.get<Subject[]>('/api/subjects'),
         api.get<Teacher[]>('/api/users/teachers'),
         api.get<Student[]>('/api/users/students'),
-        api.get<SubjectAssignment[]>('/api/subject-assignments'),
+        api.get<SubjectAssignment[]>(`/api/subject-assignments${query}`),
       ])
       setClasses(classList)
       setSubjects(subjectList)
       setTeachers(teacherList)
       setStudents(studentList)
       setSubjectAssignments(assignmentList)
+    } catch {
+      setClasses([])
+      setSubjects([])
+      setTeachers([])
+      setStudents([])
+      setSubjectAssignments([])
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [academic.academicYearId, academic.periodId])
 
   useEffect(() => {
     void reload()

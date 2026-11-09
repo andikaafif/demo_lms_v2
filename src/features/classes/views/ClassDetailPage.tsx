@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+﻿import { useEffect, useMemo, useState } from 'react'
 import {
   Avatar,
   Box,
@@ -34,8 +34,14 @@ import PageHeader from '@/components/common/PageHeader'
 import LoadingSkeleton from '@/components/common/LoadingSkeleton'
 import EmptyState from '@/components/common/EmptyState'
 import ConfirmDialog from '@/components/common/ConfirmDialog'
-import { getInitials } from '@/lib/format'
+import { formatDate, getInitials } from '@/lib/format'
+import { api, buildQuery } from '@/lib/api'
+import { useAcademicContext } from '@/hooks/useAcademicContext'
+import { useLocaleStore } from '@/store/localeStore'
+import type { Material } from '@/features/materials/models/types'
+import type { AttendanceSession } from '@/features/attendance/models/types'
 import { useRoleScope } from '@/hooks/useRoleScope'
+import { academicPeriodName, academicYearName } from '@/features/academic/models/catalog'
 import { useClassesViewModel } from '../viewmodels/useClassesViewModel'
 
 export default function ClassDetailPage() {
@@ -44,6 +50,10 @@ export default function ClassDetailPage() {
   const scope = useRoleScope()
   const { classId } = useParams<{ classId: string }>()
   const vm = useClassesViewModel()
+  const academic = useAcademicContext()
+  const locale = useLocaleStore((state) => state.locale)
+  const [materials, setMaterials] = useState<Material[]>([])
+  const [sessions, setSessions] = useState<AttendanceSession[]>([])
 
   const [enrollOpen, setEnrollOpen] = useState(false)
   const [selected, setSelected] = useState<string[]>([])
@@ -73,6 +83,22 @@ export default function ClassDetailPage() {
     [classId, vm.subjectAssignments],
   )
 
+  useEffect(() => {
+    if (!classId) return
+    const query = buildQuery({
+      classId,
+      academicYearId: academic.academicYearId,
+      periodId: academic.periodId,
+    })
+    void Promise.all([
+      api.get<Material[]>(`/api/materials${query}`).catch(() => []),
+      api.get<AttendanceSession[]>(`/api/attendance${query}`).catch(() => []),
+    ]).then(([materialList, sessionList]) => {
+      setMaterials(materialList)
+      setSessions(sessionList)
+    })
+  }, [academic.academicYearId, academic.periodId, classId])
+
   if (vm.loading) return <LoadingSkeleton variant="detail" />
 
   if (!schoolClass) {
@@ -89,7 +115,7 @@ export default function ClassDetailPage() {
     <Box>
       <PageHeader
         title={schoolClass.name}
-        subtitle={`${schoolClass.academicYear} · ${schoolClass.room} · ${vm.teacherNameOf(
+        subtitle={`${academicYearName(schoolClass.academicYearId)} · ${academicPeriodName(schoolClass.periodId)} · ${schoolClass.room} · ${vm.teacherNameOf(
           schoolClass.homeroomTeacherId,
         )}`}
         gradient="rose"
@@ -246,6 +272,96 @@ export default function ClassDetailPage() {
         </Card>
       </Box>
 
+      <Box
+        sx={{
+          display: 'grid',
+          gap: 2.5,
+          gridTemplateColumns: { xs: '1fr', lg: '1fr 1fr' },
+          alignItems: 'start',
+          mt: 2.5,
+        }}
+      >
+        <Card>
+          <CardContent sx={{ p: 2.5 }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 800, mb: 2 }}>
+              {t('classes.materialsPerMeeting')}
+            </Typography>
+            {materials.length === 0 ? (
+              <Typography variant="body2" color="text.secondary">
+                {t('materials.noMaterials')}
+              </Typography>
+            ) : (
+              <Stack spacing={1.25}>
+                {[...materials]
+                  .sort((a, b) => a.meeting - b.meeting)
+                  .map((material) => (
+                    <Stack
+                      key={material.id}
+                      direction="row"
+                      spacing={1.5}
+                      alignItems="center"
+                      sx={{ p: 1.25, borderRadius: 2, bgcolor: 'action.hover' }}
+                    >
+                      <Chip
+                        size="small"
+                        label={t('materials.meetingLabel', { meeting: material.meeting })}
+                        sx={{ fontWeight: 700 }}
+                      />
+                      <Box sx={{ minWidth: 0, flex: 1 }}>
+                        <Typography variant="body2" sx={{ fontWeight: 700 }} noWrap>
+                          {material.title}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary" noWrap>
+                          {vm.subjects.find((s) => s.id === material.subjectId)?.name ?? '-'}
+                        </Typography>
+                      </Box>
+                    </Stack>
+                  ))}
+              </Stack>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent sx={{ p: 2.5 }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 800, mb: 2 }}>
+              {t('classes.attendancePerSession')}
+            </Typography>
+            {sessions.length === 0 ? (
+              <Typography variant="body2" color="text.secondary">
+                {t('attendance.noSessions')}
+              </Typography>
+            ) : (
+              <Table size="small">
+                <TableHead>
+                  <TableRow>
+                    <TableCell>{t('common.date')}</TableCell>
+                    <TableCell>{t('common.subject')}</TableCell>
+                    <TableCell align="center">{t('attendance.meeting')}</TableCell>
+                    <TableCell align="center">{t('attendance.present')}</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {sessions.slice(0, 8).map((session) => (
+                    <TableRow key={session.id} hover>
+                      <TableCell>{formatDate(session.date, locale)}</TableCell>
+                      <TableCell>
+                        {vm.subjects.find((s) => s.id === session.subjectId)?.name ?? '-'}
+                      </TableCell>
+                      <TableCell align="center">{session.meeting}</TableCell>
+                      <TableCell align="center">
+                        {session.entries.filter((entry) => entry.status === 'present').length}/
+                        {session.entries.length}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </CardContent>
+        </Card>
+      </Box>
+
       <Dialog open={enrollOpen} onClose={() => setEnrollOpen(false)} fullWidth maxWidth="xs">
         <DialogTitle sx={{ fontWeight: 800 }}>{t('classes.enrollStudents')}</DialogTitle>
         <DialogContent dividers sx={{ p: 0 }}>
@@ -308,3 +424,5 @@ export default function ClassDetailPage() {
     </Box>
   )
 }
+
+

@@ -1,17 +1,26 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+﻿import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api, buildQuery } from '@/lib/api'
 import { useSnackbarStore } from '@/store/snackbarStore'
 import { useRoleScope } from '@/hooks/useRoleScope'
+import { useAcademicContext } from '@/hooks/useAcademicContext'
 import { useReferenceData } from '@/hooks/useReferenceData'
 import { classIdOfStudent, classesForScope, defaultClassId } from '@/lib/scope'
-import type { Gradebook } from '../models/types'
+import type {
+  AttitudeGrade,
+  AttitudeGradebook,
+  Gradebook,
+  SubjectRecap,
+} from '../models/types'
 
 interface GradebookViewModel {
   gradebook: Gradebook | null
+  recap: SubjectRecap | null
+  attitude: AttitudeGradebook | null
   loading: boolean
   saving: boolean
   canEditNotes: boolean
+  canEditAttitude: boolean
   isReadOnly: boolean
   classId: string
   subjectId: string
@@ -21,18 +30,23 @@ interface GradebookViewModel {
   availableSubjects: ReturnType<typeof useReferenceData>['subjects']
   reload: () => Promise<void>
   saveNote: (studentId: string, note: string) => Promise<boolean>
+  saveAttitude: (studentId: string, grade: AttitudeGrade, note: string) => Promise<boolean>
   subjectNameOf: (id: string | null | undefined) => string
   stats: { highest: number | null; lowest: number | null }
 }
 
-export function useGradebookViewModel(): GradebookViewModel {
+export function useGradebookViewModel(options?: { classId?: string }): GradebookViewModel {
   const { t } = useTranslation()
   const notify = useSnackbarStore((state) => state.notify)
   const scope = useRoleScope()
+  const academic = useAcademicContext()
   const reference = useReferenceData()
 
   const [gradebook, setGradebook] = useState<Gradebook | null>(null)
-  const [classId, setClassId] = useState('')
+  const [recap, setRecap] = useState<SubjectRecap | null>(null)
+  const [attitude, setAttitude] = useState<AttitudeGradebook | null>(null)
+  const [internalClassId, setClassId] = useState('')
+  const classId = options?.classId ?? internalClassId
   const [subjectId, setSubjectId] = useState('')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -48,14 +62,15 @@ export function useGradebookViewModel(): GradebookViewModel {
   )
 
   useEffect(() => {
-    if (classId) return
+    if (options?.classId) return
+    if (internalClassId) return
     if (scope.isReadOnly && ownClassId) {
       setClassId(ownClassId)
       return
     }
     const preferred = defaultClassId(availableClasses)
     if (preferred) setClassId(preferred)
-  }, [availableClasses, classId, ownClassId, scope.isReadOnly])
+  }, [availableClasses, internalClassId, options?.classId, ownClassId, scope.isReadOnly])
 
   const load = useCallback(async () => {
     if (!classId) {
@@ -64,18 +79,41 @@ export function useGradebookViewModel(): GradebookViewModel {
     }
     setLoading(true)
     try {
-      const query = buildQuery({
+      const context = {
         classId,
-        subjectId,
-        studentId: scope.isReadOnly ? scope.studentId : undefined,
-      })
-      setGradebook(await api.get<Gradebook>(`/api/grades${query}`))
+        academicYearId: academic.academicYearId,
+        periodId: academic.periodId,
+      }
+      const [gradebookData, recapData, attitudeData] = await Promise.all([
+        api.get<Gradebook>(
+          `/api/grades${buildQuery({
+            ...context,
+            subjectId,
+            studentId: scope.isReadOnly ? scope.studentId : undefined,
+          })}`,
+        ),
+        api.get<SubjectRecap>(`/api/grades/recap${buildQuery(context)}`).catch(() => null),
+        api.get<AttitudeGradebook>(`/api/grades/attitude${buildQuery(context)}`).catch(() => null),
+      ])
+      setGradebook(gradebookData)
+      setRecap(recapData)
+      setAttitude(attitudeData)
     } catch {
       notify(t('errors.generic'), 'error')
     } finally {
       setLoading(false)
     }
-  }, [classId, notify, reference.loading, scope.isReadOnly, scope.studentId, subjectId, t])
+  }, [
+    academic.academicYearId,
+    academic.periodId,
+    classId,
+    notify,
+    reference.loading,
+    scope.isReadOnly,
+    scope.studentId,
+    subjectId,
+    t,
+  ])
 
   useEffect(() => {
     void load()
@@ -99,6 +137,24 @@ export function useGradebookViewModel(): GradebookViewModel {
     [load, notify, t],
   )
 
+  const saveAttitude = useCallback(
+    async (studentId: string, grade: AttitudeGrade, note: string) => {
+      setSaving(true)
+      try {
+        await api.put(`/api/grades/attitude/${studentId}`, { grade, note })
+        await load()
+        notify(t('gradebook.attitudeSaved'), 'success')
+        return true
+      } catch {
+        notify(t('errors.generic'), 'error')
+        return false
+      } finally {
+        setSaving(false)
+      }
+    },
+    [load, notify, t],
+  )
+
   const stats = useMemo(() => {
     const averages = (gradebook?.rows ?? [])
       .map((row) => row.average)
@@ -109,9 +165,12 @@ export function useGradebookViewModel(): GradebookViewModel {
 
   return {
     gradebook,
+    recap,
+    attitude,
     loading: loading || reference.loading,
     saving,
     canEditNotes: scope.isAdmin || scope.isTeacher,
+    canEditAttitude: scope.isAdmin || scope.isTeacher || scope.isHomeroomTeacher,
     isReadOnly: scope.isReadOnly,
     classId,
     subjectId,
@@ -121,6 +180,7 @@ export function useGradebookViewModel(): GradebookViewModel {
     availableSubjects: reference.subjects,
     reload: load,
     saveNote,
+    saveAttitude,
     subjectNameOf: reference.subjectNameOf,
     stats,
   }

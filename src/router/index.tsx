@@ -1,4 +1,4 @@
-import { Navigate, createBrowserRouter } from 'react-router-dom'
+﻿import { Navigate, createBrowserRouter } from 'react-router-dom'
 import MainLayout from '@/components/Layout/MainLayout'
 import PrivateRoute from './PrivateRoute'
 import RoleRoute from './RoleRoute'
@@ -9,6 +9,7 @@ import MaterialsPage from '@/features/materials/views/MaterialsPage'
 import AssignmentsPage from '@/features/assignments/views/AssignmentsPage'
 import AttendancePage from '@/features/attendance/views/AttendancePage'
 import GradebookPage from '@/features/gradebook/views/GradebookPage'
+import SchedulePage from '@/features/schedule/views/SchedulePage'
 import ClassesPage from '@/features/classes/views/ClassesPage'
 import ClassDetailPage from '@/features/classes/views/ClassDetailPage'
 import SubjectsPage from '@/features/subjects/views/SubjectsPage'
@@ -28,18 +29,16 @@ export const router = createBrowserRouter([
           { path: '/', element: <Navigate to="/dashboard" replace /> },
           { path: '/dashboard', element: <DashboardRouter /> },
           { path: '/announcements', element: <AnnouncementsPage /> },
-          {
-            element: <RoleRoute allowed={['admin', 'teacher', 'student']} />,
-            children: [{ path: '/materials', element: <MaterialsPage /> }],
-          },
+          { path: '/materials', element: <MaterialsPage /> },
           { path: '/assignments', element: <AssignmentsPage /> },
           { path: '/attendance', element: <AttendancePage /> },
+          { path: '/schedule', element: <SchedulePage /> },
           { path: '/gradebook', element: <GradebookPage /> },
+          { path: '/classes', element: <ClassesPage /> },
+          { path: '/classes/:classId', element: <ClassDetailPage /> },
           {
-            element: <RoleRoute allowed={['admin', 'teacher']} />,
+            element: <RoleRoute allowed={['admin']} />,
             children: [
-              { path: '/classes', element: <ClassesPage /> },
-              { path: '/classes/:classId', element: <ClassDetailPage /> },
               { path: '/subjects', element: <SubjectsPage /> },
               { path: '/users/students/:studentId', element: <StudentDetailPage /> },
             ],
@@ -48,7 +47,10 @@ export const router = createBrowserRouter([
             element: <RoleRoute allowed={['admin']} />,
             children: [{ path: '/users', element: <UsersPage /> }],
           },
-          { path: '/school-profile', element: <SchoolProfilePage /> },
+          {
+            element: <RoleRoute allowed={['admin']} />,
+            children: [{ path: '/school-profile', element: <SchoolProfilePage /> }],
+          },
           { path: '*', element: <NotFoundPage /> },
         ],
       },

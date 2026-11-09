@@ -1,6 +1,18 @@
-import { HttpResponse, delay, http } from 'msw'
-import type { LoginCredentials, LoginResponse } from '@/features/auth/models/types'
+﻿import { HttpResponse, delay, http } from 'msw'
+import type { AuthUser, LoginCredentials, LoginResponse } from '@/features/auth/models/types'
 import { db } from '../data/db'
+
+function toAuthUser(accountId: string): AuthUser | null {
+  const account = db.accounts.find((item) => item.id === accountId)
+  if (!account) return null
+  const user: AuthUser = { ...account }
+  delete (user as { password?: string }).password
+  if (user.role === 'teacher' && user.teacherId) {
+    const teacher = db.teachers.find((item) => item.id === user.teacherId)
+    return { ...user, homeroomClassId: teacher?.homeroomClassId ?? null }
+  }
+  return user
+}
 
 export const authHandlers = [
   http.post('/api/auth/login', async ({ request }) => {
@@ -17,7 +29,10 @@ export const authHandlers = [
       )
     }
 
-    const { password: _password, ...user } = account
+    const user = toAuthUser(account.id)
+    if (!user) {
+      return HttpResponse.json({ message: 'invalidCredentials' }, { status: 401 })
+    }
     const payload: LoginResponse = {
       token: `demo-token.${account.id}.${Date.now()}`,
       user,
@@ -34,11 +49,9 @@ export const authHandlers = [
     await delay(200)
     const url = new URL(request.url)
     const userId = url.searchParams.get('userId')
-    const account = db.accounts.find((item) => item.id === userId)
-    if (!account) {
-      return HttpResponse.json({ message: 'notFound' }, { status: 404 })
-    }
-    const { password: _password, ...user } = account
+    if (!userId) return HttpResponse.json({ message: 'notFound' }, { status: 404 })
+    const user = toAuthUser(userId)
+    if (!user) return HttpResponse.json({ message: 'notFound' }, { status: 404 })
     return HttpResponse.json(user)
   }),
 ]

@@ -31,12 +31,15 @@ import ImageRoundedIcon from '@mui/icons-material/ImageRounded'
 import PlayCircleRoundedIcon from '@mui/icons-material/PlayCircleRounded'
 import LinkRoundedIcon from '@mui/icons-material/LinkRounded'
 import ArticleRoundedIcon from '@mui/icons-material/ArticleRounded'
+import SlideshowRoundedIcon from '@mui/icons-material/SlideshowRounded'
+import DescriptionRoundedIcon from '@mui/icons-material/DescriptionRounded'
 import VisibilityRoundedIcon from '@mui/icons-material/VisibilityRounded'
 import DownloadRoundedIcon from '@mui/icons-material/DownloadRounded'
 import PageHeader from '@/components/common/PageHeader'
 import LoadingSkeleton from '@/components/common/LoadingSkeleton'
 import EmptyState from '@/components/common/EmptyState'
 import ConfirmDialog from '@/components/common/ConfirmDialog'
+import AcademicContextBar from '@/components/common/AcademicContextBar'
 import { formatDate, formatFileSize, youtubeEmbedUrl } from '@/lib/format'
 import { useLocaleStore } from '@/store/localeStore'
 import { useSnackbarStore } from '@/store/snackbarStore'
@@ -53,6 +56,8 @@ const typeIcon: Record<MaterialType, ReactElement> = {
   video: <PlayCircleRoundedIcon />,
   link: <LinkRoundedIcon />,
   text: <ArticleRoundedIcon />,
+  ppt: <SlideshowRoundedIcon />,
+  doc: <DescriptionRoundedIcon />,
 }
 
 const emptyValues: MaterialFormValues = {
@@ -60,6 +65,10 @@ const emptyValues: MaterialFormValues = {
   description: '',
   subjectId: '',
   classId: '',
+  meeting: 1,
+  textbook: '',
+  linkLabel: '',
+  linkUrl: '',
   type: 'pdf',
   youtubeUrl: '',
   attachmentName: '',
@@ -100,9 +109,13 @@ export default function MaterialsPage() {
             youtubeUrl: dialog.item.youtubeUrl ?? '',
             attachmentName: dialog.item.attachments[0]?.name ?? '',
           }
-        : { ...emptyValues, classId: vm.availableClasses[0]?.id ?? '' },
+        : {
+            ...emptyValues,
+            classId: vm.availableClasses[0]?.id ?? '',
+            subjectId: vm.availableSubjects[0]?.id ?? '',
+          },
     )
-  }, [dialog, form, vm.availableClasses])
+  }, [dialog, form, vm.availableClasses, vm.availableSubjects])
 
   return (
     <Box>
@@ -124,6 +137,8 @@ export default function MaterialsPage() {
           ) : null
         }
       />
+
+      <AcademicContextBar />
 
       <Card sx={{ mb: 2.5 }}>
         <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
@@ -226,6 +241,11 @@ export default function MaterialsPage() {
                           sx={{ bgcolor: alpha(color, 0.14), color, fontWeight: 700 }}
                         />
                         <Chip size="small" variant="outlined" label={vm.classNameOf(material.classId)} />
+                        <Chip
+                          size="small"
+                          variant="outlined"
+                          label={t('materials.meetingLabel', { meeting: material.meeting })}
+                        />
                       </Stack>
                     </Box>
                   </Stack>
@@ -459,6 +479,8 @@ export default function MaterialsPage() {
                     <MenuItem value="video">{t('materials.typeVideo')}</MenuItem>
                     <MenuItem value="link">{t('materials.typeLink')}</MenuItem>
                     <MenuItem value="text">{t('materials.typeText')}</MenuItem>
+                    <MenuItem value="ppt">{t('materials.typePpt')}</MenuItem>
+                    <MenuItem value="doc">{t('materials.typeDoc')}</MenuItem>
                   </TextField>
                 )}
               />
@@ -533,3 +555,5 @@ export default function MaterialsPage() {
     </Box>
   )
 }
+
+

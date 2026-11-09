@@ -1,9 +1,10 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+﻿import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { z } from 'zod'
-import { api } from '@/lib/api'
+import { api, buildQuery } from '@/lib/api'
 import { useSnackbarStore } from '@/store/snackbarStore'
 import { useRoleScope } from '@/hooks/useRoleScope'
+import { useAcademicContext } from '@/hooks/useAcademicContext'
 import { classesForScope } from '@/lib/scope'
 import type { Subject, SubjectAssignment } from '@/features/subjects/models/types'
 import type { Student, Teacher } from '@/features/users/models/types'
@@ -16,7 +17,8 @@ export const classSchema = z.object({
     .int()
     .min(1, 'classes.validation.gradeRange')
     .max(6, 'classes.validation.gradeRange'),
-  academicYear: z.string().min(1, 'classes.validation.academicYearRequired'),
+  academicYearId: z.string().min(1, 'classes.validation.academicYearRequired'),
+  periodId: z.string().min(1, 'classes.validation.periodRequired'),
   homeroomTeacherId: z.string().nullable(),
   room: z.string().min(1, 'classes.validation.roomRequired'),
   status: z.enum(['active', 'archived']),
@@ -46,6 +48,7 @@ export function useClassesViewModel(): ClassesViewModel {
   const { t } = useTranslation()
   const notify = useSnackbarStore((state) => state.notify)
   const scope = useRoleScope()
+  const academic = useAcademicContext()
 
   const [classes, setClasses] = useState<SchoolClass[]>([])
   const [teachers, setTeachers] = useState<Teacher[]>([])
@@ -58,12 +61,16 @@ export function useClassesViewModel(): ClassesViewModel {
   const reload = useCallback(async () => {
     setLoading(true)
     try {
+      const query = buildQuery({
+        academicYearId: academic.academicYearId,
+        periodId: academic.periodId,
+      })
       const [classList, teacherList, studentList, subjectList, assignmentList] = await Promise.all([
-        api.get<SchoolClass[]>('/api/classes'),
+        api.get<SchoolClass[]>(`/api/classes${query}`),
         api.get<Teacher[]>('/api/users/teachers'),
         api.get<Student[]>('/api/users/students'),
         api.get<Subject[]>('/api/subjects'),
-        api.get<SubjectAssignment[]>('/api/subject-assignments'),
+        api.get<SubjectAssignment[]>(`/api/subject-assignments${query}`),
       ])
       setClasses(classList)
       setTeachers(teacherList)
@@ -75,7 +82,7 @@ export function useClassesViewModel(): ClassesViewModel {
     } finally {
       setLoading(false)
     }
-  }, [notify, t])
+  }, [academic.academicYearId, academic.periodId, notify, t])
 
   useEffect(() => {
     void reload()

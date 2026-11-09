@@ -1,5 +1,8 @@
-import type { Material } from '@/features/materials/models/types'
+﻿import type { Material } from '@/features/materials/models/types'
 import { isoDaysFromNow } from './dateHelpers'
+
+const ACTIVE_YEAR = 'ay-2025-2026'
+const ACTIVE_PERIOD = 'ap-2025-2026-odd'
 
 export const materials: Material[] = [
   {
@@ -10,6 +13,13 @@ export const materials: Material[] = [
     subjectId: 's-mtk',
     classId: 'c-5e',
     teacherId: 't-1',
+    academicYearId: ACTIVE_YEAR,
+    periodId: ACTIVE_PERIOD,
+    meeting: 1,
+    textbook: 'Matematika Kelas 5, Bab 2 (halaman 12-24)',
+    links: [
+      { id: 'ml-1', label: 'Video penjelasan pecahan', url: 'https://www.youtube.com/watch?v=al-do-HGuIk' },
+    ],
     type: 'pdf',
     attachments: [
       {
@@ -38,6 +48,11 @@ export const materials: Material[] = [
     subjectId: 's-ipas',
     classId: 'c-5e',
     teacherId: 't-1',
+    academicYearId: ACTIVE_YEAR,
+    periodId: ACTIVE_PERIOD,
+    meeting: 2,
+    textbook: 'IPAS Kelas 5, Bab 4',
+    links: [],
     type: 'video',
     youtubeUrl: 'https://www.youtube.com/watch?v=al-do-HGuIk',
     attachments: [],
@@ -52,6 +67,11 @@ export const materials: Material[] = [
     subjectId: 's-bind',
     classId: 'c-5e',
     teacherId: 't-2',
+    academicYearId: ACTIVE_YEAR,
+    periodId: ACTIVE_PERIOD,
+    meeting: 3,
+    textbook: 'Bahasa Indonesia Kelas 5, Bab 3',
+    links: [],
     type: 'pdf',
     attachments: [
       {
@@ -73,6 +93,11 @@ export const materials: Material[] = [
     subjectId: 's-ipas',
     classId: 'c-5e',
     teacherId: 't-1',
+    academicYearId: ACTIVE_YEAR,
+    periodId: ACTIVE_PERIOD,
+    meeting: 4,
+    textbook: 'IPAS Kelas 5, Bab 5',
+    links: [],
     type: 'image',
     attachments: [
       {
@@ -94,6 +119,11 @@ export const materials: Material[] = [
     subjectId: 's-bing',
     classId: 'c-5e',
     teacherId: 't-2',
+    academicYearId: ACTIVE_YEAR,
+    periodId: ACTIVE_PERIOD,
+    meeting: 5,
+    textbook: 'English Book Grade 5, Unit 2',
+    links: [{ id: 'ml-2', label: 'Kuis kosakata online', url: 'https://quizizz.com/' }],
     type: 'link',
     youtubeUrl: '',
     attachments: [
@@ -115,6 +145,11 @@ export const materials: Material[] = [
     subjectId: 's-mtk',
     classId: 'c-6f',
     teacherId: 't-1',
+    academicYearId: ACTIVE_YEAR,
+    periodId: ACTIVE_PERIOD,
+    meeting: 1,
+    textbook: 'Matematika Kelas 6, Bab 3',
+    links: [],
     type: 'pdf',
     attachments: [
       {
@@ -127,5 +162,30 @@ export const materials: Material[] = [
     ],
     publishedAt: isoDaysFromNow(-7, 8, 0),
     viewCount: 33,
+  },
+  {
+    id: 'm-7',
+    title: 'Presentasi Powerpoint: Sistem Pencernaan Manusia',
+    description: 'Slide presentasi 18 halaman tentang organ dan proses pencernaan manusia.',
+    subjectId: 's-ipas',
+    classId: 'c-5e',
+    teacherId: 't-1',
+    academicYearId: ACTIVE_YEAR,
+    periodId: ACTIVE_PERIOD,
+    meeting: 6,
+    textbook: 'IPAS Kelas 5, Bab 6',
+    links: [],
+    type: 'ppt',
+    attachments: [
+      {
+        id: 'ma-7',
+        name: 'Sistem-Pencernaan.pptx',
+        type: 'ppt',
+        url: '/files/sistem-pencernaan.pptx',
+        sizeKb: 3200,
+      },
+    ],
+    publishedAt: isoDaysFromNow(-1, 9, 30),
+    viewCount: 12,
   },
 ]

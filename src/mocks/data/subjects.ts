@@ -1,4 +1,4 @@
-import type { Subject, SubjectAssignment } from '@/features/subjects/models/types'
+﻿import type { Subject, SubjectAssignment } from '@/features/subjects/models/types'
 
 export const subjects: Subject[] = [
   {
@@ -67,19 +67,42 @@ export const subjects: Subject[] = [
   },
 ]
 
-export const subjectAssignments: SubjectAssignment[] = [
-  { id: 'sa-1', subjectId: 's-mtk', classId: 'c-5e', teacherId: 't-1', schedule: 'Senin, 07.30 - 09.00' },
-  { id: 'sa-2', subjectId: 's-ipas', classId: 'c-5e', teacherId: 't-1', schedule: 'Selasa, 09.30 - 11.00' },
-  { id: 'sa-3', subjectId: 's-bind', classId: 'c-5e', teacherId: 't-2', schedule: 'Rabu, 07.30 - 09.00' },
-  { id: 'sa-4', subjectId: 's-bing', classId: 'c-5e', teacherId: 't-2', schedule: 'Kamis, 10.00 - 11.00' },
-  { id: 'sa-5', subjectId: 's-pjok', classId: 'c-5e', teacherId: 't-3', schedule: 'Jumat, 07.00 - 08.30' },
-  { id: 'sa-6', subjectId: 's-pai', classId: 'c-5e', teacherId: 't-4', schedule: 'Senin, 09.30 - 11.00' },
-  { id: 'sa-7', subjectId: 's-sbdp', classId: 'c-5e', teacherId: 't-5', schedule: 'Kamis, 07.30 - 09.00' },
-  { id: 'sa-8', subjectId: 's-ppkn', classId: 'c-5e', teacherId: 't-4', schedule: 'Rabu, 09.30 - 10.30' },
-  { id: 'sa-9', subjectId: 's-mtk', classId: 'c-6f', teacherId: 't-1', schedule: 'Selasa, 07.30 - 09.00' },
-  { id: 'sa-10', subjectId: 's-bind', classId: 'c-4d', teacherId: 't-2', schedule: 'Senin, 07.30 - 09.00' },
-  { id: 'sa-11', subjectId: 's-pjok', classId: 'c-6f', teacherId: 't-3', schedule: 'Rabu, 07.00 - 08.30' },
-  { id: 'sa-12', subjectId: 's-sbdp', classId: 'c-2b', teacherId: 't-5', schedule: 'Jumat, 09.00 - 10.30' },
-  { id: 'sa-13', subjectId: 's-pai', classId: 'c-3c', teacherId: 't-4', schedule: 'Selasa, 07.30 - 09.00' },
-  { id: 'sa-14', subjectId: 's-mtk', classId: 'c-1a', teacherId: 't-6', schedule: 'Senin, 07.30 - 08.30' },
+const ACTIVE_YEAR = 'ay-2025-2026'
+const ACTIVE_PERIOD = 'ap-2025-2026-odd'
+
+interface AssignmentSeed {
+  id: string
+  subjectId: string
+  classId: string
+  teacherId: string
+  dayOfWeek: number
+  startTime: string
+  endTime: string
+  meeting: number
+}
+
+const seeds: AssignmentSeed[] = [
+  { id: 'sa-1', subjectId: 's-mtk', classId: 'c-5e', teacherId: 't-1', dayOfWeek: 1, startTime: '07:30', endTime: '09:00', meeting: 1 },
+  { id: 'sa-2', subjectId: 's-ipas', classId: 'c-5e', teacherId: 't-1', dayOfWeek: 2, startTime: '09:30', endTime: '11:00', meeting: 2 },
+  { id: 'sa-3', subjectId: 's-bind', classId: 'c-5e', teacherId: 't-2', dayOfWeek: 3, startTime: '07:30', endTime: '09:00', meeting: 3 },
+  { id: 'sa-4', subjectId: 's-bing', classId: 'c-5e', teacherId: 't-2', dayOfWeek: 4, startTime: '10:00', endTime: '11:00', meeting: 4 },
+  { id: 'sa-5', subjectId: 's-pjok', classId: 'c-5e', teacherId: 't-3', dayOfWeek: 5, startTime: '07:00', endTime: '08:30', meeting: 5 },
+  { id: 'sa-6', subjectId: 's-pai', classId: 'c-5e', teacherId: 't-4', dayOfWeek: 1, startTime: '09:30', endTime: '11:00', meeting: 6 },
+  { id: 'sa-7', subjectId: 's-sbdp', classId: 'c-5e', teacherId: 't-5', dayOfWeek: 4, startTime: '07:30', endTime: '09:00', meeting: 7 },
+  { id: 'sa-8', subjectId: 's-ppkn', classId: 'c-5e', teacherId: 't-4', dayOfWeek: 3, startTime: '09:30', endTime: '10:30', meeting: 8 },
+  { id: 'sa-9', subjectId: 's-mtk', classId: 'c-6f', teacherId: 't-1', dayOfWeek: 2, startTime: '07:30', endTime: '09:00', meeting: 1 },
+  { id: 'sa-10', subjectId: 's-bind', classId: 'c-4d', teacherId: 't-2', dayOfWeek: 1, startTime: '07:30', endTime: '09:00', meeting: 1 },
+  { id: 'sa-11', subjectId: 's-pjok', classId: 'c-6f', teacherId: 't-3', dayOfWeek: 3, startTime: '07:00', endTime: '08:30', meeting: 2 },
+  { id: 'sa-12', subjectId: 's-sbdp', classId: 'c-2b', teacherId: 't-5', dayOfWeek: 5, startTime: '09:00', endTime: '10:30', meeting: 1 },
+  { id: 'sa-13', subjectId: 's-pai', classId: 'c-3c', teacherId: 't-4', dayOfWeek: 2, startTime: '07:30', endTime: '09:00', meeting: 1 },
+  { id: 'sa-14', subjectId: 's-mtk', classId: 'c-1a', teacherId: 't-6', dayOfWeek: 1, startTime: '07:30', endTime: '08:30', meeting: 1 },
 ]
+
+const dayNames = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu']
+
+export const subjectAssignments: SubjectAssignment[] = seeds.map((seed) => ({
+  ...seed,
+  academicYearId: ACTIVE_YEAR,
+  periodId: ACTIVE_PERIOD,
+  schedule: `${dayNames[seed.dayOfWeek]}, ${seed.startTime.replace(':', '.')} - ${seed.endTime.replace(':', '.')}`,
+}))

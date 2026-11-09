@@ -34,6 +34,8 @@ import { useLocaleStore } from '@/store/localeStore'
 import { useRoleScope } from '@/hooks/useRoleScope'
 import type { AttendanceStatus } from '../models/types'
 import { useAttendanceViewModel } from '../viewmodels/useAttendanceViewModel'
+import AttendanceMonitorView from './AttendanceMonitorView'
+import AcademicContextBar from '@/components/common/AcademicContextBar'
 
 const STATUSES: AttendanceStatus[] = ['present', 'sick', 'permission', 'absent']
 
@@ -42,6 +44,21 @@ export default function AttendancePage() {
   const locale = useLocaleStore((state) => state.locale)
   const scope = useRoleScope()
   const vm = useAttendanceViewModel()
+
+  if (scope.isAdmin) {
+    return (
+      <Box>
+        <PageHeader
+          title={t('attendance.title')}
+          subtitle={t('attendance.monitorSubtitle')}
+          gradient="forest"
+          icon={<FactCheckRoundedIcon sx={{ fontSize: 30 }} />}
+        />
+        <AcademicContextBar />
+        <AttendanceMonitorView />
+      </Box>
+    )
+  }
 
   const summaryItems = [
     { key: 'present' as const, value: vm.summary?.present ?? 0 },
@@ -64,6 +81,8 @@ export default function AttendancePage() {
         gradient="forest"
         icon={<FactCheckRoundedIcon sx={{ fontSize: 30 }} />}
       />
+
+      <AcademicContextBar />
 
       <Card sx={{ mb: 2.5 }}>
         <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
@@ -106,6 +125,14 @@ export default function AttendancePage() {
                   value={vm.date}
                   onChange={(event) => vm.setDate(event.target.value)}
                   InputLabelProps={{ shrink: true }}
+                  fullWidth
+                />
+                <TextField
+                  size="small"
+                  type="number"
+                  label={t('attendance.meeting')}
+                  value={vm.meeting}
+                  onChange={(event) => vm.setMeeting(Number(event.target.value))}
                   fullWidth
                 />
               </>

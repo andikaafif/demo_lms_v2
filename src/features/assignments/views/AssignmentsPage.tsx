@@ -1,9 +1,10 @@
-import { useEffect, useMemo, useState } from 'react'
+﻿import { useEffect, useMemo, useState } from 'react'
 import {
   Box,
   Button,
   Card,
   CardContent,
+  Checkbox,
   Chip,
   Dialog,
   DialogActions,
@@ -36,15 +37,26 @@ import DeleteRoundedIcon from '@mui/icons-material/DeleteRounded'
 import FactCheckRoundedIcon from '@mui/icons-material/FactCheckRounded'
 import SendRoundedIcon from '@mui/icons-material/SendRounded'
 import EventRoundedIcon from '@mui/icons-material/EventRounded'
+import ArrowUpwardRoundedIcon from '@mui/icons-material/ArrowUpwardRounded'
+import ArrowDownwardRoundedIcon from '@mui/icons-material/ArrowDownwardRounded'
+import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded'
+import AcademicContextBar from '@/components/common/AcademicContextBar'
 import PageHeader from '@/components/common/PageHeader'
 import LoadingSkeleton from '@/components/common/LoadingSkeleton'
 import EmptyState from '@/components/common/EmptyState'
 import ConfirmDialog from '@/components/common/ConfirmDialog'
 import { formatDateTime, toDateTimeLocalValue, daysUntil } from '@/lib/format'
 import { useLocaleStore } from '@/store/localeStore'
-import type { AssignmentWithStats, Submission, SubmissionStatus } from '../models/types'
+import type {
+  AssignmentFieldType,
+  AssignmentWithStats,
+  Submission,
+  SubmissionStatus,
+} from '../models/types'
 import {
   assignmentSchema,
+  createField,
+  FIELD_TYPES,
   submissionSchema,
   useAssignmentsViewModel,
   type AssignmentFormValues,
@@ -83,6 +95,7 @@ export default function AssignmentsPage() {
   const [gradeScore, setGradeScore] = useState('')
   const [gradeFeedback, setGradeFeedback] = useState('')
   const [submitting, setSubmitting] = useState<AssignmentWithStats | null>(null)
+  const [answers, setAnswers] = useState<Record<string, string | string[]>>({})
 
   const form = useForm<AssignmentFormValues>({
     resolver: zodResolver(assignmentSchema),
@@ -91,10 +104,13 @@ export default function AssignmentsPage() {
       description: '',
       subjectId: '',
       classId: '',
+      meeting: 1,
       dueDate: '',
       maxScore: 100,
       allowFileUpload: true,
       allowTextAnswer: true,
+      published: true,
+      fields: [],
     },
   })
 
@@ -112,20 +128,26 @@ export default function AssignmentsPage() {
             description: dialog.item.description,
             subjectId: dialog.item.subjectId,
             classId: dialog.item.classId,
+            meeting: dialog.item.meeting,
             dueDate: toDateTimeLocalValue(dialog.item.dueDate),
             maxScore: dialog.item.maxScore,
             allowFileUpload: dialog.item.allowFileUpload,
             allowTextAnswer: dialog.item.allowTextAnswer,
+            published: dialog.item.published,
+            fields: dialog.item.fields,
           }
         : {
             title: '',
             description: '',
             subjectId: vm.availableSubjects[0]?.id ?? '',
             classId: vm.availableClasses[0]?.id ?? '',
+            meeting: 1,
             dueDate: '',
             maxScore: 100,
             allowFileUpload: true,
             allowTextAnswer: true,
+            published: true,
+            fields: [],
           },
     )
   }, [dialog, form, vm.availableClasses, vm.availableSubjects])
@@ -137,6 +159,7 @@ export default function AssignmentsPage() {
       textAnswer: existing?.textAnswer ?? '',
       fileName: existing?.files[0]?.name ?? '',
     })
+    setAnswers(existing?.answers ?? {})
   }, [submitting, submissionForm, vm])
 
   const reviewSubmissions = useMemo(
@@ -171,6 +194,8 @@ export default function AssignmentsPage() {
           ) : null
         }
       />
+
+      <AcademicContextBar />
 
       {vm.canManage ? (
         <Card sx={{ mb: 2.5 }}>
@@ -259,10 +284,18 @@ export default function AssignmentsPage() {
                         />
                         <Chip
                           size="small"
+                          variant="outlined"
+                          label={t('assignments.meetingLabel', { meeting: assignment.meeting })}
+                        />
+                        <Chip
+                          size="small"
                           color={overdue ? 'error' : 'default'}
                           icon={<EventRoundedIcon />}
                           label={dueLabel(assignment)}
                         />
+                        {!assignment.published ? (
+                          <Chip size="small" color="warning" label={t('assignments.draft')} />
+                        ) : null}
                       </Stack>
                     </Box>
                     {vm.canManage ? (
@@ -486,6 +519,33 @@ export default function AssignmentsPage() {
                   )}
                 />
               </Stack>
+              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems={{ sm: 'center' }}>
+                <Controller
+                  control={form.control}
+                  name="meeting"
+                  render={({ field, fieldState }) => (
+                    <TextField
+                      {...field}
+                      type="number"
+                      label={t('assignments.meeting')}
+                      fullWidth
+                      onChange={(event) => field.onChange(Number(event.target.value))}
+                      error={Boolean(fieldState.error)}
+                      helperText={fieldState.error ? t(fieldState.error.message ?? '') : ''}
+                    />
+                  )}
+                />
+                <Controller
+                  control={form.control}
+                  name="published"
+                  render={({ field }) => (
+                    <FormControlLabel
+                      control={<Switch checked={field.value} onChange={field.onChange} />}
+                      label={t('assignments.published')}
+                    />
+                  )}
+                />
+              </Stack>
               <Controller
                 control={form.control}
                 name="description"
@@ -523,6 +583,210 @@ export default function AssignmentsPage() {
                   )}
                 />
               </Stack>
+              <Divider />
+              <Stack direction="row" alignItems="center" justifyContent="space-between">
+                <Box>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 800 }}>
+                    {t('assignments.questions')}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {t('assignments.questionsHint')}
+                  </Typography>
+                </Box>
+                <Button
+                  size="small"
+                  startIcon={<AddRoundedIcon />}
+                  onClick={() => {
+                    const current = form.getValues('fields')
+                    form.setValue('fields', [...current, createField()], { shouldDirty: true })
+                  }}
+                >
+                  {t('assignments.addField')}
+                </Button>
+              </Stack>
+              {(form.watch('fields') ?? []).length === 0 ? (
+                <Typography variant="body2" color="text.secondary">
+                  {t('assignments.noFields')}
+                </Typography>
+              ) : (
+                <Stack spacing={1.5}>
+                  {(form.watch('fields') ?? []).map((field, index) => (
+                    <Card key={field.id} variant="outlined">
+                      <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+                        <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1.5 }}>
+                          <Chip size="small" label={`${t('assignments.question')} ${index + 1}`} />
+                          <Box sx={{ flex: 1 }} />
+                          <Tooltip title={t('assignments.moveUp')}>
+                            <span>
+                              <IconButton
+                                size="small"
+                                disabled={index === 0}
+                                onClick={() => {
+                                  const current = [...form.getValues('fields')]
+                                  ;[current[index - 1], current[index]] = [current[index], current[index - 1]]
+                                  form.setValue('fields', current, { shouldDirty: true })
+                                }}
+                              >
+                                <ArrowUpwardRoundedIcon fontSize="small" />
+                              </IconButton>
+                            </span>
+                          </Tooltip>
+                          <Tooltip title={t('assignments.moveDown')}>
+                            <span>
+                              <IconButton
+                                size="small"
+                                disabled={index === (form.watch('fields') ?? []).length - 1}
+                                onClick={() => {
+                                  const current = [...form.getValues('fields')]
+                                  ;[current[index + 1], current[index]] = [current[index], current[index + 1]]
+                                  form.setValue('fields', current, { shouldDirty: true })
+                                }}
+                              >
+                                <ArrowDownwardRoundedIcon fontSize="small" />
+                              </IconButton>
+                            </span>
+                          </Tooltip>
+                          <Tooltip title={t('common.delete')}>
+                            <IconButton
+                              size="small"
+                              color="error"
+                              onClick={() => {
+                                const current = form.getValues('fields').filter((item) => item.id !== field.id)
+                                form.setValue('fields', current, { shouldDirty: true })
+                              }}
+                            >
+                              <DeleteOutlineRoundedIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        </Stack>
+                        <Stack spacing={1.5}>
+                          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
+                            <TextField
+                              size="small"
+                              label={t('assignments.fieldLabel')}
+                              fullWidth
+                              value={field.label}
+                              onChange={(event) => {
+                                const current = form.getValues('fields').map((item) =>
+                                  item.id === field.id ? { ...item, label: event.target.value } : item,
+                                )
+                                form.setValue('fields', current, { shouldDirty: true })
+                              }}
+                            />
+                            <TextField
+                              size="small"
+                              select
+                              label={t('assignments.fieldType')}
+                              value={field.type}
+                              sx={{ minWidth: 190 }}
+                              onChange={(event) => {
+                                const type = event.target.value as AssignmentFieldType
+                                const current = form.getValues('fields').map((item) =>
+                                  item.id === field.id
+                                    ? {
+                                        ...item,
+                                        type,
+                                        options:
+                                          type === 'multipleChoice' || type === 'checkbox' || type === 'dropdown'
+                                            ? item.options.length > 0
+                                              ? item.options
+                                              : ['']
+                                            : [],
+                                      }
+                                    : item,
+                                )
+                                form.setValue('fields', current, { shouldDirty: true })
+                              }}
+                            >
+                              {FIELD_TYPES.map((type) => (
+                                <MenuItem key={type} value={type}>
+                                  {t(`assignments.fieldType_${type}`)}
+                                </MenuItem>
+                              ))}
+                            </TextField>
+                            <FormControlLabel
+                              control={
+                                <Switch
+                                  checked={field.required}
+                                  onChange={(event) => {
+                                    const current = form.getValues('fields').map((item) =>
+                                      item.id === field.id
+                                        ? { ...item, required: event.target.checked }
+                                        : item,
+                                    )
+                                    form.setValue('fields', current, { shouldDirty: true })
+                                  }}
+                                />
+                              }
+                              label={t('assignments.required')}
+                            />
+                          </Stack>
+                          {field.type === 'multipleChoice' ||
+                          field.type === 'checkbox' ||
+                          field.type === 'dropdown' ? (
+                            <Stack spacing={1}>
+                              {field.options.map((option, optionIndex) => (
+                                <Stack key={optionIndex} direction="row" spacing={1} alignItems="center">
+                                  <TextField
+                                    size="small"
+                                    fullWidth
+                                    label={`${t('assignments.option')} ${optionIndex + 1}`}
+                                    value={option}
+                                    onChange={(event) => {
+                                      const current = form.getValues('fields').map((item) =>
+                                        item.id === field.id
+                                          ? {
+                                              ...item,
+                                              options: item.options.map((value, i) =>
+                                                i === optionIndex ? event.target.value : value,
+                                              ),
+                                            }
+                                          : item,
+                                      )
+                                      form.setValue('fields', current, { shouldDirty: true })
+                                    }}
+                                  />
+                                  <IconButton
+                                    size="small"
+                                    color="error"
+                                    onClick={() => {
+                                      const current = form.getValues('fields').map((item) =>
+                                        item.id === field.id
+                                          ? {
+                                              ...item,
+                                              options: item.options.filter((_, i) => i !== optionIndex),
+                                            }
+                                          : item,
+                                      )
+                                      form.setValue('fields', current, { shouldDirty: true })
+                                    }}
+                                  >
+                                    <DeleteOutlineRoundedIcon fontSize="small" />
+                                  </IconButton>
+                                </Stack>
+                              ))}
+                              <Button
+                                size="small"
+                                startIcon={<AddRoundedIcon />}
+                                onClick={() => {
+                                  const current = form.getValues('fields').map((item) =>
+                                    item.id === field.id
+                                      ? { ...item, options: [...item.options, ''] }
+                                      : item,
+                                  )
+                                  form.setValue('fields', current, { shouldDirty: true })
+                                }}
+                              >
+                                {t('assignments.addOption')}
+                              </Button>
+                            </Stack>
+                          ) : null}
+                        </Stack>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </Stack>
+              )}
             </Stack>
           </DialogContent>
           <DialogActions sx={{ px: 3, py: 2 }}>
@@ -662,7 +926,7 @@ export default function AssignmentsPage() {
           noValidate
           onSubmit={submissionForm.handleSubmit(async (values) => {
             if (!submitting) return
-            const ok = await vm.submitAssignment(submitting.id, values)
+            const ok = await vm.submitAssignment(submitting.id, values, answers)
             if (ok) setSubmitting(null)
           })}
         >
@@ -675,6 +939,97 @@ export default function AssignmentsPage() {
             </Typography>
             <Divider sx={{ my: 2 }} />
             <Stack spacing={2}>
+              {submitting?.fields.map((field, index) => (
+                <Box key={field.id}>
+                  <Typography variant="body2" sx={{ fontWeight: 700, mb: 0.75 }}>
+                    {index + 1}. {field.label}
+                    {field.required ? ' *' : ''}
+                  </Typography>
+                  {field.type === 'longAnswer' ? (
+                    <TextField
+                      fullWidth
+                      multiline
+                      rows={3}
+                      value={String(answers[field.id] ?? '')}
+                      onChange={(event) =>
+                        setAnswers((previous) => ({ ...previous, [field.id]: event.target.value }))
+                      }
+                    />
+                  ) : field.type === 'multipleChoice' || field.type === 'dropdown' ? (
+                    <TextField
+                      select
+                      fullWidth
+                      size="small"
+                      value={String(answers[field.id] ?? '')}
+                      onChange={(event) =>
+                        setAnswers((previous) => ({ ...previous, [field.id]: event.target.value }))
+                      }
+                    >
+                      {field.options.map((option) => (
+                        <MenuItem key={option} value={option}>
+                          {option}
+                        </MenuItem>
+                      ))}
+                    </TextField>
+                  ) : field.type === 'checkbox' ? (
+                    <Stack>
+                      {field.options.map((option) => {
+                        const selected = Array.isArray(answers[field.id])
+                          ? (answers[field.id] as string[])
+                          : []
+                        return (
+                          <FormControlLabel
+                            key={option}
+                            control={
+                              <Checkbox
+                                checked={selected.includes(option)}
+                                onChange={(event) =>
+                                  setAnswers((previous) => {
+                                    const current = Array.isArray(previous[field.id])
+                                      ? (previous[field.id] as string[])
+                                      : []
+                                    return {
+                                      ...previous,
+                                      [field.id]: event.target.checked
+                                        ? [...current, option]
+                                        : current.filter((item) => item !== option),
+                                    }
+                                  })
+                                }
+                              />
+                            }
+                            label={option}
+                          />
+                        )
+                      })}
+                    </Stack>
+                  ) : field.type === 'fileUpload' ? (
+                    <TextField
+                      fullWidth
+                      size="small"
+                      placeholder="nama-file.pdf"
+                      value={String(answers[field.id] ?? '')}
+                      onChange={(event) =>
+                        setAnswers((previous) => ({ ...previous, [field.id]: event.target.value }))
+                      }
+                    />
+                  ) : (
+                    <TextField
+                      fullWidth
+                      size="small"
+                      type={
+                        field.type === 'number' ? 'number' : field.type === 'date' ? 'date' : 'text'
+                      }
+                      InputLabelProps={field.type === 'date' ? { shrink: true } : undefined}
+                      value={String(answers[field.id] ?? '')}
+                      onChange={(event) =>
+                        setAnswers((previous) => ({ ...previous, [field.id]: event.target.value }))
+                      }
+                    />
+                  )}
+                </Box>
+              ))}
+              {(submitting?.fields.length ?? 0) === 0 ? (
               <Controller
                 control={submissionForm.control}
                 name="textAnswer"
@@ -690,7 +1045,8 @@ export default function AssignmentsPage() {
                   />
                 )}
               />
-              {submitting?.allowFileUpload ? (
+              ) : null}
+              {submitting?.allowFileUpload && (submitting?.fields.length ?? 0) === 0 ? (
                 <Controller
                   control={submissionForm.control}
                   name="fileName"
@@ -732,3 +1088,9 @@ export default function AssignmentsPage() {
     </Box>
   )
 }
+
+
+
+
+
+

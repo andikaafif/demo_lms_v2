@@ -38,13 +38,17 @@ import EmptyState from '@/components/common/EmptyState'
 import ConfirmDialog from '@/components/common/ConfirmDialog'
 import { getInitials } from '@/lib/format'
 import { useRoleScope } from '@/hooks/useRoleScope'
+import { useAcademicContext } from '@/hooks/useAcademicContext'
+import AcademicContextBar from '@/components/common/AcademicContextBar'
+import { academicPeriodName, academicYearName, periodsForYear } from '@/features/academic/models/catalog'
 import type { SchoolClass } from '../models/types'
 import { classSchema, useClassesViewModel, type ClassFormValues } from '../viewmodels/useClassesViewModel'
 
 const emptyValues: ClassFormValues = {
   name: '',
   grade: 1,
-  academicYear: '2024/2025',
+  academicYearId: '',
+  periodId: '',
   homeroomTeacherId: null,
   room: '',
   status: 'active',
@@ -55,6 +59,7 @@ export default function ClassesPage() {
   const theme = useTheme()
   const navigate = useNavigate()
   const scope = useRoleScope()
+  const academic = useAcademicContext()
   const vm = useClassesViewModel()
 
   const [dialog, setDialog] = useState<{ open: boolean; item: SchoolClass | null }>({
@@ -78,7 +83,8 @@ export default function ClassesPage() {
         ? {
             name: dialog.item.name,
             grade: dialog.item.grade,
-            academicYear: dialog.item.academicYear,
+            academicYearId: dialog.item.academicYearId,
+            periodId: dialog.item.periodId,
             homeroomTeacherId: dialog.item.homeroomTeacherId,
             room: dialog.item.room,
             status: dialog.item.status,
@@ -114,6 +120,8 @@ export default function ClassesPage() {
           ) : null
         }
       />
+
+      <AcademicContextBar />
 
       {vm.loading ? (
         <LoadingSkeleton variant="cards" count={6} />
@@ -158,7 +166,7 @@ export default function ClassesPage() {
                           {item.name}
                         </Typography>
                         <Typography variant="caption" color="text.secondary">
-                          {item.academicYear}
+                          {academicYearName(item.academicYearId)} · {academicPeriodName(item.periodId)}
                         </Typography>
                       </Box>
                       {item.status === 'archived' ? (
@@ -290,15 +298,42 @@ export default function ClassesPage() {
               />
               <Controller
                 control={form.control}
-                name="academicYear"
+                name="academicYearId"
                 render={({ field, fieldState }) => (
                   <TextField
                     {...field}
-                    label={t('classes.academicYear')}
+                    select
+                    label={t('academic.academicYear')}
                     fullWidth
                     error={Boolean(fieldState.error)}
                     helperText={fieldState.error ? t(fieldState.error.message ?? '') : ''}
-                  />
+                  >
+                    {academic.years.map((year) => (
+                      <MenuItem key={year.id} value={year.id}>
+                        {year.name}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                )}
+              />
+              <Controller
+                control={form.control}
+                name="periodId"
+                render={({ field, fieldState }) => (
+                  <TextField
+                    {...field}
+                    select
+                    label={t('academic.period')}
+                    fullWidth
+                    error={Boolean(fieldState.error)}
+                    helperText={fieldState.error ? t(fieldState.error.message ?? '') : ''}
+                  >
+                    {periodsForYear(form.watch('academicYearId')).map((period) => (
+                      <MenuItem key={period.id} value={period.id}>
+                        {period.name}
+                      </MenuItem>
+                    ))}
+                  </TextField>
                 )}
               />
               <Controller
@@ -372,3 +407,7 @@ export default function ClassesPage() {
     </Box>
   )
 }
+
+
+
+

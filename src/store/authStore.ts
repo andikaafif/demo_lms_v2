@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type { AuthUser, LoginCredentials, LoginResponse } from '@/features/auth/models/types'
+import { useAcademicStore } from '@/store/academicStore'
 
 interface AuthState {
   user: AuthUser | null
@@ -37,6 +38,7 @@ export const useAuthStore = create<AuthState>()(
           }
 
           const data = (await response.json()) as LoginResponse
+          useAcademicStore.getState().resetToActive()
           set({ user: data.user, token: data.token, isLoading: false, error: null })
           return data.user
         } catch (error) {
@@ -48,6 +50,7 @@ export const useAuthStore = create<AuthState>()(
 
       logout: () => {
         void fetch('/api/auth/logout', { method: 'POST' }).catch(() => undefined)
+        useAcademicStore.getState().resetToActive()
         set({ user: null, token: null, error: null })
       },
 

@@ -1,4 +1,4 @@
-import type { ComponentType } from 'react'
+﻿import type { ComponentType } from 'react'
 import type { SvgIconProps } from '@mui/material'
 import DashboardRoundedIcon from '@mui/icons-material/DashboardRounded'
 import SchoolRoundedIcon from '@mui/icons-material/SchoolRounded'
@@ -10,6 +10,7 @@ import AssignmentRoundedIcon from '@mui/icons-material/AssignmentRounded'
 import FactCheckRoundedIcon from '@mui/icons-material/FactCheckRounded'
 import GradingRoundedIcon from '@mui/icons-material/GradingRounded'
 import CampaignRoundedIcon from '@mui/icons-material/CampaignRounded'
+import CalendarMonthRoundedIcon from '@mui/icons-material/CalendarMonthRounded'
 import type { UserRole } from '@/features/auth/models/types'
 import type { GradientKey } from '@/theme'
 
@@ -47,7 +48,7 @@ export const NAV_ITEMS: NavItem[] = [
     path: '/materials',
     labelKey: 'nav.materials',
     icon: LibraryBooksRoundedIcon,
-    roles: ['admin', 'teacher', 'student'],
+    roles: ['admin', 'teacher', 'student', 'parent'],
     section: 'academic',
     gradient: 'teal',
   },
@@ -70,6 +71,15 @@ export const NAV_ITEMS: NavItem[] = [
     gradient: 'forest',
   },
   {
+    key: 'schedule',
+    path: '/schedule',
+    labelKey: 'nav.schedule',
+    icon: CalendarMonthRoundedIcon,
+    roles: ['admin', 'teacher', 'student', 'parent'],
+    section: 'academic',
+    gradient: 'ocean',
+  },
+  {
     key: 'gradebook',
     path: '/gradebook',
     labelKey: 'nav.gradebook',
@@ -83,7 +93,7 @@ export const NAV_ITEMS: NavItem[] = [
     path: '/classes',
     labelKey: 'nav.classes',
     icon: ClassRoundedIcon,
-    roles: ['admin', 'teacher'],
+    roles: ['admin', 'teacher', 'student', 'parent'],
     section: 'management',
     gradient: 'rose',
   },
@@ -92,7 +102,7 @@ export const NAV_ITEMS: NavItem[] = [
     path: '/subjects',
     labelKey: 'nav.subjects',
     icon: MenuBookRoundedIcon,
-    roles: ['admin', 'teacher'],
+    roles: ['admin'],
     section: 'management',
     gradient: 'secondary',
   },
@@ -110,7 +120,7 @@ export const NAV_ITEMS: NavItem[] = [
     path: '/school-profile',
     labelKey: 'nav.schoolProfile',
     icon: SchoolRoundedIcon,
-    roles: ['admin', 'teacher', 'student', 'parent'],
+    roles: ['admin'],
     section: 'management',
     gradient: 'primary',
   },

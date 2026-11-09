@@ -14,7 +14,7 @@ export const schoolProfileSchema = z.object({
   website: z.string().url('school.validation.urlInvalid').or(z.literal('')),
   principalName: z.string().min(1, 'school.validation.principalRequired'),
   accreditation: z.enum(['A', 'B', 'C', 'Belum Terakreditasi']),
-  description: z.string().min(1, 'school.validation.nameRequired'),
+  description: z.string().min(1, 'school.validation.descriptionRequired'),
   establishedYear: z
     .number({ invalid_type_error: 'school.validation.yearInvalid' })
     .int()

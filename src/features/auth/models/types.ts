@@ -11,6 +11,8 @@ export interface AuthUser {
   studentId?: string
   /** Populated when role === 'teacher' */
   teacherId?: string
+  /** Populated when the teacher is also a homeroom teacher. */
+  homeroomClassId?: string | null
   /** Populated when role === 'parent' — students this parent may access */
   childIds?: string[]
 }
@@ -29,3 +31,4 @@ export interface ApiErrorPayload {
   message: string
   code?: string
 }
+

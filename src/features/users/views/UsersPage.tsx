@@ -38,6 +38,7 @@ import type { Student, Teacher } from '../models/types'
 import { useUsersViewModel } from '../viewmodels/useUsersViewModel'
 import TeacherFormDialog from './TeacherFormDialog'
 import StudentFormDialog from './StudentFormDialog'
+import AccountManagementView from './AccountManagementView'
 
 export default function UsersPage() {
   const { t } = useTranslation()
@@ -79,21 +80,27 @@ export default function UsersPage() {
         gradient="violet"
         icon={<GroupsRoundedIcon sx={{ fontSize: 30 }} />}
         action={
-          <Button
-            variant="contained"
-            color="secondary"
-            startIcon={<AddRoundedIcon />}
-            onClick={() =>
-              tab === 0
-                ? setTeacherDialog({ open: true, item: null })
-                : setStudentDialog({ open: true, item: null })
-            }
-          >
-            {tab === 0 ? t('users.addTeacher') : t('users.addStudent')}
-          </Button>
+          tab === 2 ? null : (
+            <Button
+              variant="contained"
+              color="secondary"
+              startIcon={<AddRoundedIcon />}
+              onClick={() =>
+                tab === 0
+                  ? setTeacherDialog({ open: true, item: null })
+                  : setStudentDialog({ open: true, item: null })
+              }
+            >
+              {tab === 0 ? t('users.addTeacher') : t('users.addStudent')}
+            </Button>
+          )
         }
       />
 
+      {tab === 2 ? (
+        <AccountManagementView />
+      ) : (
+      <>
       <Card sx={{ mb: 2.5 }}>
         <Tabs
           value={tab}
@@ -103,6 +110,7 @@ export default function UsersPage() {
         >
           <Tab label={`${t('users.tabTeachers')} (${vm.teachers.length})`} />
           <Tab label={`${t('users.tabStudents')} (${vm.students.length})`} />
+          <Tab label={t('users.tabAccounts')} />
         </Tabs>
 
         <Box sx={{ p: 2 }}>
@@ -352,6 +360,9 @@ export default function UsersPage() {
             </Table>
           </TableContainer>
         </Card>
+      )}
+
+      </>
       )}
 
       <TeacherFormDialog

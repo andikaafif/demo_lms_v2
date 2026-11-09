@@ -1,4 +1,4 @@
-export interface Subject {
+﻿export interface Subject {
   id: string
   name: string
   code: string
@@ -14,6 +14,13 @@ export interface SubjectAssignment {
   classId: string
   teacherId: string
   schedule: string
+  academicYearId: string
+  periodId: string
+  /** Day of week (0 = Sunday) used by the schedule module. */
+  dayOfWeek: number
+  startTime: string
+  endTime: string
+  meeting: number
 }
 
 export type SubjectInput = Omit<Subject, 'id'>

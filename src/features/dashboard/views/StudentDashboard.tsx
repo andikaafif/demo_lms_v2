@@ -9,6 +9,7 @@ import LoadingSkeleton from '@/components/common/LoadingSkeleton'
 import StatCard from '@/components/common/StatCard'
 import { useRoleScope } from '@/hooks/useRoleScope'
 import { useDashboardViewModel } from '../viewmodels/useDashboardViewModel'
+import SubjectSummaryView from './SubjectSummaryView'
 import {
   DashboardHeader,
   LatestMaterials,
@@ -98,6 +99,10 @@ export default function StudentDashboard() {
           subjectNameOf={vm.subjectNameOf}
           subjectColorOf={vm.subjectColorOf}
         />
+      </Box>
+
+      <Box sx={{ mb: 2.5 }}>
+        <SubjectSummaryView />
       </Box>
 
       <RecentAnnouncements announcements={vm.announcements} />

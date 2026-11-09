@@ -1,6 +1,9 @@
-import type { Assignment, Submission } from '@/features/assignments/models/types'
+﻿import type { Assignment, Submission } from '@/features/assignments/models/types'
 import { isoDaysFromNow } from './dateHelpers'
 import { students } from './users'
+
+const ACTIVE_YEAR = 'ay-2025-2026'
+const ACTIVE_PERIOD = 'ap-2025-2026-odd'
 
 export const assignments: Assignment[] = [
   {
@@ -11,11 +14,38 @@ export const assignments: Assignment[] = [
     subjectId: 's-mtk',
     classId: 'c-5e',
     teacherId: 't-1',
+    academicYearId: ACTIVE_YEAR,
+    periodId: ACTIVE_PERIOD,
+    meeting: 1,
     maxScore: 100,
     dueDate: isoDaysFromNow(-5, 23, 59),
     createdAt: isoDaysFromNow(-12, 8, 0),
     allowFileUpload: true,
     allowTextAnswer: true,
+    published: true,
+    fields: [
+      {
+        id: 'af-1',
+        type: 'number',
+        label: 'Hasil dari 2 1/4 + 1 1/2',
+        required: true,
+        options: [],
+      },
+      {
+        id: 'af-2',
+        type: 'longAnswer',
+        label: 'Jelaskan langkah menyamakan penyebut pada soal nomor 1',
+        required: true,
+        options: [],
+      },
+      {
+        id: 'af-3',
+        type: 'fileUpload',
+        label: 'Unggah foto lembar kerja',
+        required: false,
+        options: [],
+      },
+    ],
   },
   {
     id: 'a-2',
@@ -25,11 +55,38 @@ export const assignments: Assignment[] = [
     subjectId: 's-ipas',
     classId: 'c-5e',
     teacherId: 't-1',
+    academicYearId: ACTIVE_YEAR,
+    periodId: ACTIVE_PERIOD,
+    meeting: 2,
     maxScore: 100,
     dueDate: isoDaysFromNow(2, 23, 59),
     createdAt: isoDaysFromNow(-8, 10, 30),
     allowFileUpload: true,
     allowTextAnswer: true,
+    published: true,
+    fields: [
+      {
+        id: 'af-4',
+        type: 'multipleChoice',
+        label: 'Proses perubahan uap air menjadi titik air disebut...',
+        required: true,
+        options: ['Evaporasi', 'Kondensasi', 'Presipitasi', 'Infiltrasi'],
+      },
+      {
+        id: 'af-5',
+        type: 'checkbox',
+        label: 'Tahapan siklus air yang kamu amati di rumah',
+        required: false,
+        options: ['Evaporasi', 'Kondensasi', 'Presipitasi', 'Infiltrasi'],
+      },
+      {
+        id: 'af-6',
+        type: 'longAnswer',
+        label: 'Tuliskan laporan pengamatanmu',
+        required: true,
+        options: [],
+      },
+    ],
   },
   {
     id: 'a-3',
@@ -39,11 +96,31 @@ export const assignments: Assignment[] = [
     subjectId: 's-bind',
     classId: 'c-5e',
     teacherId: 't-2',
+    academicYearId: ACTIVE_YEAR,
+    periodId: ACTIVE_PERIOD,
+    meeting: 3,
     maxScore: 100,
     dueDate: isoDaysFromNow(6, 23, 59),
     createdAt: isoDaysFromNow(-3, 9, 15),
     allowFileUpload: false,
     allowTextAnswer: true,
+    published: true,
+    fields: [
+      {
+        id: 'af-7',
+        type: 'dropdown',
+        label: 'Pilih cerita rakyat yang kamu tulis',
+        required: true,
+        options: ['Malin Kundang', 'Timun Mas', 'Sangkuriang', 'Bawang Merah Bawang Putih'],
+      },
+      {
+        id: 'af-8',
+        type: 'longAnswer',
+        label: 'Tuliskan teks narasimu',
+        required: true,
+        options: [],
+      },
+    ],
   },
   {
     id: 'a-4',
@@ -53,11 +130,57 @@ export const assignments: Assignment[] = [
     subjectId: 's-sbdp',
     classId: 'c-5e',
     teacherId: 't-5',
+    academicYearId: ACTIVE_YEAR,
+    periodId: ACTIVE_PERIOD,
+    meeting: 7,
     maxScore: 100,
     dueDate: isoDaysFromNow(9, 23, 59),
     createdAt: isoDaysFromNow(-1, 14, 0),
     allowFileUpload: true,
     allowTextAnswer: false,
+    published: true,
+    fields: [
+      {
+        id: 'af-9',
+        type: 'fileUpload',
+        label: 'Unggah foto poster',
+        required: true,
+        options: [],
+      },
+      {
+        id: 'af-10',
+        type: 'date',
+        label: 'Tanggal poster dibuat',
+        required: false,
+        options: [],
+      },
+    ],
+  },
+  {
+    id: 'a-5',
+    title: 'Draft Kuis Perkalian (belum dipublish)',
+    description: 'Kuis singkat perkalian dua digit. Masih dalam penyusunan guru.',
+    subjectId: 's-mtk',
+    classId: 'c-5e',
+    teacherId: 't-1',
+    academicYearId: ACTIVE_YEAR,
+    periodId: ACTIVE_PERIOD,
+    meeting: 8,
+    maxScore: 50,
+    dueDate: isoDaysFromNow(14, 23, 59),
+    createdAt: isoDaysFromNow(0, 7, 0),
+    allowFileUpload: false,
+    allowTextAnswer: true,
+    published: false,
+    fields: [
+      {
+        id: 'af-11',
+        type: 'shortAnswer',
+        label: '24 x 13 = ...',
+        required: true,
+        options: [],
+      },
+    ],
   },
 ]
 
@@ -103,7 +226,7 @@ const feedbackSamples: Record<string, string> = {
 function buildSubmissions(): Submission[] {
   const result: Submission[] = []
 
-  // Assignment 1 — past due and fully graded.
+  // Assignment 1 - past due and fully graded.
   class5eStudents.forEach((student, index) => {
     result.push({
       id: `sub-a1-${student.id}`,
@@ -123,10 +246,14 @@ function buildSubmissions(): Submission[] {
       score: gradedScores[student.id] ?? 80,
       feedback: feedbackSamples[student.id] ?? 'Terima kasih sudah mengumpulkan tepat waktu.',
       gradedAt: isoDaysFromNow(-4, 15, 0),
+      answers: {
+        'af-1': String(3.75),
+        'af-2': answerSamples[index % answerSamples.length],
+      },
     })
   })
 
-  // Assignment 2 — open, mixed submitted / pending.
+  // Assignment 2 - open, mixed submitted / pending.
   class5eStudents.forEach((student, index) => {
     const submitted = index % 3 !== 2
     result.push({
@@ -149,10 +276,17 @@ function buildSubmissions(): Submission[] {
       score: null,
       feedback: '',
       gradedAt: null,
+      answers: submitted
+        ? {
+            'af-4': 'Kondensasi',
+            'af-5': ['Evaporasi', 'Presipitasi'],
+            'af-6': reportSamples[index % reportSamples.length],
+          }
+        : {},
     })
   })
 
-  // Assignment 3 — open, nobody has submitted yet.
+  // Assignment 3 - open, nobody has submitted yet.
   class5eStudents.forEach((student) => {
     result.push({
       id: `sub-a3-${student.id}`,
@@ -165,10 +299,11 @@ function buildSubmissions(): Submission[] {
       score: null,
       feedback: '',
       gradedAt: null,
+      answers: {},
     })
   })
 
-  // Assignment 4 — newly created, all pending.
+  // Assignment 4 - newly created, all pending.
   class5eStudents.forEach((student) => {
     result.push({
       id: `sub-a4-${student.id}`,
@@ -181,6 +316,7 @@ function buildSubmissions(): Submission[] {
       score: null,
       feedback: '',
       gradedAt: null,
+      answers: {},
     })
   })
 
